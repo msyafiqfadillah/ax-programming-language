@@ -1,0 +1,19 @@
+class Punctions:
+    PARANTHESSES_O = "("
+    PARANTHESSES_C = ")"
+    CURVED_O = "{"
+    CURVED_C =  "}"
+    SQUARE_O = "["
+    SQUARE_C = "]"
+
+    @classmethod
+    def all(cls):
+        return {
+            cls.PARANTHESSES_O,
+            cls.PARANTHESSES_C,
+            cls.CURVED_O,
+            cls.CURVED_C,
+            cls.SQUARE_O,
+            cls.SQUARE_C
+        }
+
