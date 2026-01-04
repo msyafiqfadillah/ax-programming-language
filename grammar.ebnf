@@ -1,0 +1,23 @@
+program     ::= [ { statement } ]
+
+statement   ::= if_stmt | loop_stmt | return_stmt | var_stmt | set_stmt | prc_stmt
+if_stmt     ::= "if" "(" expression block ")" { "maybe" "(" expression ")" block } [ "else" block ]
+loop_stmt   ::= "loop" "(" expression ")" block
+prc_stmt    ::= "prc" identifier "(" [ identifier { "," identifier } ] ")" "{" block "}"
+return_stmt ::= "return" [ expression ]
+var_stmt    ::= "var" identifier "=" expression
+set_stmt    ::= "set" identifier "=" expression
+
+block       ::= "{" [ expression ] "}"
+expression  ::= term { operator term }
+
+operator    ::= "+" | "-" | "/" | "%" | "*" | "^"
+term	    ::= number | string
+string      ::= letter { letter }
+number      ::= integer | decimal
+integer     ::= [ "-" ] digit+
+decimal     ::= [ "-" ] digit+ "," digit+
+digit       ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+identifier  ::= [ "_" ] letter { [ "_" ] letter [ digit ] }
+letter      ::= "a" | ... | "z" | "A" | ... "Z"
