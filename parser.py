@@ -230,11 +230,10 @@ class Parser:
     def parse_args(self):
         params = []
 
-        while (self.peek()["type"] in ("NUMBER", "STRING")):
-            # TODO: multiple param type
-            param = self.match("NUMBER", "type")["value"]
+        while (not helper.is_eof(self.index, self.tokens) and self.peek()["value"] != Punctions.PARANTHESSES_C):
+            param = self.parse_term()
 
-            params.append(Literal(param))
+            params.append(param)
 
         return params
     
@@ -315,7 +314,6 @@ def main():
         {"type": "PUNCTION", "value": "("},
         {"type": "PUNCTION", "value": ")"},
     ]
-
 
     for token in parser.parse_program(sample).body:
         print(repr(token))
