@@ -275,7 +275,7 @@ def main():
         {"type": "IDENTIFIER", "value": "z"},
         {"type": "OPERATOR", "value": "+"},
         {"type": "NUMBER", "value": "22"},
-        {"type": "KEYWORDS", "value": "fct"},
+        {"type": "KEYWORDS", "value": "prc"},
         {"type": "IDENTIFIER", "value": "foo"},
         {"type": "PUNCTION", "value": "("},
         {"type": "IDENTIFIER", "value": "param_1"},
