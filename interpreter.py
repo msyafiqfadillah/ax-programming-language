@@ -155,7 +155,7 @@ def main():
         set x = 32 % 2
         set x = y * z + 22
 
-        fct test(param_1, param_2) {
+        prc test(param_1, param_2) {
             var b = 123
         }
 

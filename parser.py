@@ -65,7 +65,7 @@ class FunctionDeclaration:
     def __repr__(self):
         params = ", ".join(repr(s) for s in self.params)
 
-        return f"fct {self.name}({params}) {self.body}"
+        return f"prc {self.name}({params}) {self.body}"
     
 class CallExpression:
     def __init__(self, callee, arguments):
@@ -127,7 +127,7 @@ class Parser:
             return self.parse_var()
         elif (current_token["value"] == Keywords.SET):
             return self.parse_set()
-        elif (current_token["value"] == Keywords.FCT):
+        elif (current_token["value"] == Keywords.PRC):
             return self.parse_function()
         elif (current_token["value"] == Keywords.RETURN):
             return self.parse_return()
@@ -197,7 +197,7 @@ class Parser:
         raise TypeError(f"Expected term, but got {current["value"]}")
     
     def parse_function(self):
-        self.match(Keywords.FCT, "value")
+        self.match(Keywords.PRC, "value")
         identifier = self.match("IDENTIFIER", "type")
         self.match(Punctions.PARANTHESSES_O, "value")
         params = self.parse_params("IDENTIFIER")

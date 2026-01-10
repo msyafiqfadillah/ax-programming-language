@@ -159,7 +159,7 @@ def main() :
     scanner = Scanner()
 
     sample = '''
-        fct foo(param_1, param_2) {
+        prc foo(param_1, param_2) {
             var new_x = 12
             set new_x = 99
             set new_x = (new_x + 2) * 99

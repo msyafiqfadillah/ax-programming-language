@@ -1,7 +1,7 @@
 class Keywords:
     VAR = "var"
     SET = "set"
-    FCT = "fct"
+    PRC = "prc"
     LOOP = "loop"
     RETURN = "return"
     IF = "if"
@@ -13,7 +13,7 @@ class Keywords:
         return {
             cls.VAR,
             cls.SET,
-            cls.FCT,
+            cls.PRC,
             cls.LOOP,
             cls.RETURN,
             cls.IF,
