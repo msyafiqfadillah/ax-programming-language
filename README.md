@@ -10,6 +10,7 @@ this is my first attempt of creating a language.
 - [x] interpreter
 - [x] function declaration
 - [x] function call
+- [ ] built-in functions
 - [ ] loop
 - [ ] if-else
 - [ ] return statement
