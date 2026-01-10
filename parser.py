@@ -176,7 +176,8 @@ class Parser:
 
             if (next_peek["value"] == "("):
                 self.match(Punctions.PARANTHESSES_O, "value")
-                args = self.parse_params()
+                # TODO: multiple param type
+                args = self.parse_params("NUMBER")
                 self.match(Punctions.PARANTHESSES_C, "value")
 
                 return CallExpression(Identifier(current["value"]), args)
@@ -199,7 +200,7 @@ class Parser:
         self.match(Keywords.FCT, "value")
         identifier = self.match("IDENTIFIER", "type")
         self.match(Punctions.PARANTHESSES_O, "value")
-        params = self.parse_params()
+        params = self.parse_params("IDENTIFIER")
         self.match(Punctions.PARANTHESSES_C, "value")
         self.match(Punctions.CURVED_O, "value")
         body = self.parse_block()
@@ -217,11 +218,11 @@ class Parser:
 
         return BlockStatement(body)
     
-    def parse_params(self):
+    def parse_params(self, type_param):
         params = []
 
-        while (self.peek()["type"] == "IDENTIFIER"):
-            param = self.match("IDENTIFIER", "type")["value"]
+        while (self.peek()["type"] == type_param):
+            param = self.match(type_param, "type")["value"]
 
             params.append(Identifier(param))
 
