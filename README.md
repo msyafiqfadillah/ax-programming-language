@@ -13,6 +13,6 @@ this is my first attempt of creating a language.
 - [ ] built-in functions
 - [ ] loop
 - [ ] if-else
-- [ ] return statement
+- [x] return statement
 - [ ] break statement
 - [ ] continue statement
