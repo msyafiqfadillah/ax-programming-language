@@ -9,7 +9,9 @@ class FunctionMap:
         self.body = body
         self.parent_env = parent_env
     def call(self, interpreter, args):
-        # TODO: raise an error when params not matched with args
+        if (len(args) != len(self.params)):
+            raise RuntimeError(f"{self.params[-1]} is needed!")
+
         # TODO: return statement
 
         local_env = Environment({}, interpreter.env)
@@ -157,7 +159,7 @@ def main():
             var b = 123
         }
 
-        test(10, 2)
+        test(10)
     '''
 
     # sample = '''
