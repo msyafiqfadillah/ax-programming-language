@@ -12,6 +12,7 @@ class FunctionMap:
         self.params = params 
         self.body = body
         self.parent_env = parent_env
+        
     def call(self, interpreter, args):
         if (len(args) != len(self.params)):
             raise RuntimeError(f"{self.params[-1]} is needed!")
@@ -24,10 +25,19 @@ class FunctionMap:
         result = interpreter.eval_block(self.body, local_env)
 
         return result
+    
+class BuiltinMap:
+    def __init__(self, func):
+        self.func = func 
+
+    def call(self, interpreter, args):
+        evaluated_args = [interpreter.eval_expression(expr) for expr in args]
+
+        return self.func(*evaluated_args)
 
 class Interpreter:
     def __init__(self):
-        self.env = Environment({})
+        self.env = global_env
 
     def run(self, source):
         tokens = Scanner().scans(source)
@@ -157,6 +167,12 @@ class Interpreter:
         raise TypeError(f"Unknown expression type: {expr}")
 
 
+global_env = Environment({
+    "show": BuiltinMap(lambda *args : print(*args)),
+    "length": BuiltinMap(lambda arg : len(arg))
+})
+
+
 def main():
     sample = '''
         var x = 42
@@ -175,8 +191,15 @@ def main():
             return x1 + x2
         }
 
+        prc quad(f_term, s_term) {
+            return f_term ^ s_term
+        }
+
         test(10, 11)
         test_1(0, 3)
+
+        show(length("abc"))
+        show(quad(2, 2))
     '''
 
     interp = Interpreter()
