@@ -1,7 +1,11 @@
 from environment import Environment
 from scanner import Scanner
-from parser import Parser, VariableDeclaration, BinaryExpression, Identifier, Literal, GroupedExpression, FunctionDeclaration, CallExpression
+from parser import Parser, VariableDeclaration, BinaryExpression, Identifier, Literal, GroupedExpression, FunctionDeclaration, ReturnStatement, CallExpression
 
+
+class ReturnException(Exception):
+    def __init__(self):
+        pass
 
 class FunctionMap:
     def __init__(self, params, body, parent_env):
@@ -12,12 +16,10 @@ class FunctionMap:
         if (len(args) != len(self.params)):
             raise RuntimeError(f"{self.params[-1]} is needed!")
 
-        # TODO: return statement
-
         local_env = Environment({}, interpreter.env)
 
         for param, arg in zip(self.params, args):
-            local_env.define(param, arg)
+            local_env.define(param.name, arg)
 
         result = interpreter.eval_block(self.body, local_env)
 
@@ -41,9 +43,14 @@ class Interpreter:
         self.env = local_env
 
         for stmt in stmts.body:
-            self.eval_statement(stmt)
+            try:
+                self.eval_statement(stmt)
 
-        self.env = parent_env
+                return None
+            except ReturnException:
+                return self.eval_expression(stmt.argument)
+            finally:
+                self.env = parent_env
 
     def eval_statement(self, stmt):
         if (isinstance(stmt, VariableDeclaration)):
@@ -70,11 +77,19 @@ class Interpreter:
             self.env.define(name, func)
 
             return func
+        elif (isinstance(stmt, ReturnStatement)):
+            if (self.env.parent is not None):
+                raise ReturnException()
+            else:
+                raise RuntimeError("Cannot use return outside block")
 
         # expression statements
         return self.eval_expression(stmt)
 
     def eval_expression(self, expr):
+        if (isinstance(expr, str) or isinstance(expr, int)):
+            return expr
+
         if (isinstance(expr, Literal)):
             v = expr.value
 
@@ -91,9 +106,9 @@ class Interpreter:
 
         if (isinstance(expr, Identifier)):
             name = expr.name
-            
+
             if (name in self.env.record):
-                return self.env.record[name]
+                return self.eval_expression(self.env.lookup(name))
             
             raise NameError(f"Variable '{name}' is not defined")
 
@@ -106,9 +121,6 @@ class Interpreter:
             op = expr.operator
 
             if (op == "+"):
-                if isinstance(left, str) or isinstance(right, str):
-                    return str(left) + str(right)
-                
                 return left + right
             if (op == "-"):
                 return left - right
@@ -148,33 +160,27 @@ class Interpreter:
 def main():
     sample = '''
         var x = 42
-        var y = 99
+        var y = 102
         var z = x + (y + 3)
         var _g = "ABC"
 
-        set x = 32 % 2
-        set x = y * z + 22
+        set x = 32 % 7
+        set x = y * x + 22
 
         prc test(param_1, param_2) {
             var b = 123
         }
 
-        test(10)
+        prc test_1(x1, x2) {
+            return x1 + x2
+        }
+
+        test(10, 11)
+        test_1(0, 3)
     '''
 
-    # sample = '''
-    #     var x = 42
-    #     var y = 99
-    #     var z = x + (y + 3)
-    #     var _g = "ABC"
-
-    #     set x = 32 % 2
-    #     set x = y * x + 22
-    # '''
-
     interp = Interpreter()
-    env = interp.run(sample)
-    print(env)
+    interp.run(sample)
 
 
 if (__name__ == "__main__"):
