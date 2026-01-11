@@ -9,7 +9,7 @@ class Environment:
         return value
 
     def assign(self, name, value):
-        self.resolve(name).record = value
+        self.resolve(name).record[name] = value
 
         return value
     
