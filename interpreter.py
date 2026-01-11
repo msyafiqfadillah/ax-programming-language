@@ -17,7 +17,7 @@ class FunctionMap:
         if (len(args) != len(self.params)):
             raise RuntimeError(f"{self.params[-1]} is needed!")
 
-        local_env = Environment({}, interpreter.env)
+        local_env = Environment({}, self.parent_env)
 
         for param, arg in zip(self.params, args):
             local_env.define(param.name, arg)
@@ -52,15 +52,15 @@ class Interpreter:
         parent_env = self.env
         self.env = local_env
 
-        for stmt in stmts.body:
-            try:
+        try:
+            for stmt in stmts.body:
                 self.eval_statement(stmt)
-
-                return None
-            except ReturnException:
-                return self.eval_expression(stmt.argument)
-            finally:
-                self.env = parent_env
+            
+            return None
+        except ReturnException:
+            return self.eval_expression(stmt.argument)
+        finally:
+            self.env = parent_env
 
     def eval_statement(self, stmt):
         if (isinstance(stmt, VariableDeclaration)):
@@ -75,10 +75,10 @@ class Interpreter:
                 
                 return value
             elif (stmt.kind == "set"):
-                if ((name not in self.env.record) or (self.env.parent is not None and name not in self.env.record)):
+                if (not self.env.resolve(name)):
                     raise NameError(f"Variable '{name}' is not defined")
 
-                self.env.define(name, value)
+                self.env.assign(name, value)
 
                 return value
         elif (isinstance(stmt, FunctionDeclaration)):
@@ -117,7 +117,7 @@ class Interpreter:
         if (isinstance(expr, Identifier)):
             name = expr.name
 
-            if (name in self.env.record):
+            if ((name in self.env.record) or (self.env.parent is not None and name in self.env.parent.record)):
                 return self.eval_expression(self.env.lookup(name))
             
             raise NameError(f"Variable '{name}' is not defined")
@@ -163,6 +163,9 @@ class Interpreter:
             result = self.env.lookup(name).call(self, expr.arguments)
 
             return result
+        
+        if (isinstance(expr, FunctionMap)):
+            return expr
 
         raise TypeError(f"Unknown expression type: {expr}")
 
@@ -175,35 +178,56 @@ global_env = Environment({
 
 def main():
     sample = '''
-        var x = 42
-        var y = 102
-        var z = x + (y + 3)
-        var _g = "ABC"
+        prc test() {
+            var x = 10
 
-        set x = 32 % 7
-        set x = y * x + 22
+            prc inner_test(new_param) {
+                set x = x + new_param
 
-        prc test(param_1, param_2) {
-            var b = 123
+                return x
+            }
+
+            return inner_test
         }
 
-        prc test_1(x1, x2) {
-            return x1 + x2
-        }
+        var a = test()
 
-        prc quad(f_term, s_term) {
-            return f_term ^ s_term
-        }
-
-        test(10, 11)
-        test_1(0, 3)
-
-        show(length("abc"))
-        show(quad(2, 2))
+        show(a(5))
+        show(a(5))
     '''
+
+    # sample = '''
+    #     var x = 42
+    #     var y = 102
+    #     var z = x + (y + 3)
+    #     var _g = "ABC"
+
+    #     set x = 32 % 7
+    #     set x = y * x + 22
+
+    #     prc test(param_1, param_2) {
+    #         var b = 123
+    #     }
+
+    #     prc test_1(x1, x2) {
+    #         return x1 + x2
+    #     }
+
+    #     prc quad(f_term, s_term) {
+    #         return f_term ^ s_term
+    #     }
+
+    #     test(10, 11)
+    #     test_1(0, 3)
+
+    #     show(length("abc"))
+    #     show(quad(2, 2))
+    # '''
 
     interp = Interpreter()
     interp.run(sample)
+
+    # print(interp.env.record)
 
 
 if (__name__ == "__main__"):

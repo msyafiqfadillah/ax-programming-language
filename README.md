@@ -11,6 +11,7 @@ this is my first attempt of creating a language.
 - [x] function declaration
 - [x] function call
 - [x] built-in functions
+- [x] closure
 - [ ] array
 - [ ] hashmap
 - [ ] loop
