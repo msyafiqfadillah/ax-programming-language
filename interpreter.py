@@ -194,6 +194,7 @@ def main():
 
         show(a(5))
         show(a(5))
+        show(2 + 2)
     '''
 
     # sample = '''

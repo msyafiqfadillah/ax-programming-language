@@ -231,7 +231,7 @@ class Parser:
         params = []
 
         while (not helper.is_eof(self.index, self.tokens) and self.peek()["value"] != Punctions.PARANTHESSES_C):
-            param = self.parse_term()
+            param = self.parse_expression()
 
             params.append(param)
 
