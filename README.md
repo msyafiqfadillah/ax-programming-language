@@ -1,4 +1,4 @@
-# AX Programming Language
+# ax Programming Language
 
 this is my first attempt of creating a language.
 
