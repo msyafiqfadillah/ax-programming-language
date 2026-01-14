@@ -5,6 +5,7 @@ class Punctions:
     CURVED_C =  "}"
     SQUARE_O = "["
     SQUARE_C = "]"
+    V_LINE = "|"
 
     @classmethod
     def all(cls):
@@ -14,6 +15,7 @@ class Punctions:
             cls.CURVED_O,
             cls.CURVED_C,
             cls.SQUARE_O,
-            cls.SQUARE_C
+            cls.SQUARE_C,
+            cls.V_LINE
         }
 
