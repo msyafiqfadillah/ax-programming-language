@@ -195,40 +195,44 @@ def main():
         show(a(5))
         show(a(5))
         show(2 + 2)
+
+        prc test() {
+            var x = 10
+
+            prc inner_test(new_param) {
+                set x = x + new_param
+
+                return x
+            }
+
+            return inner_test
+        }
+
+        var q = test()
+
+        show(q(5))
+        show(q(5))
+
+        prc make_counter() {
+            var count = 0
+            prc inc() {
+                set count = count + 1
+                return count
+            }
+            return inc
+        }
+
+        var c1 = make_counter()
+        var c2 = make_counter()
+
+        show(c1())
+        show(c1())
+        show(c2())
+        show(c1())
     '''
-
-    # sample = '''
-    #     var x = 42
-    #     var y = 102
-    #     var z = x + (y + 3)
-    #     var _g = "ABC"
-
-    #     set x = 32 % 7
-    #     set x = y * x + 22
-
-    #     prc test(param_1, param_2) {
-    #         var b = 123
-    #     }
-
-    #     prc test_1(x1, x2) {
-    #         return x1 + x2
-    #     }
-
-    #     prc quad(f_term, s_term) {
-    #         return f_term ^ s_term
-    #     }
-
-    #     test(10, 11)
-    #     test_1(0, 3)
-
-    #     show(length("abc"))
-    #     show(quad(2, 2))
-    # '''
 
     interp = Interpreter()
     interp.run(sample)
-
-    # print(interp.env.record)
 
 
 if (__name__ == "__main__"):
