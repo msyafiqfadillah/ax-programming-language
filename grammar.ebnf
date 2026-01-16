@@ -1,7 +1,7 @@
 program         ::= { statement }
 
 statement       ::= if_stmt | loop_stmt | return_stmt | var_stmt | set_stmt | prc_stmt | break_stmt | continue_stmt | expression_stmt
-if_stmt         ::= "if" "(" expression block ")" { "maybe" "(" expression ")" block } [ "else" block ]
+if_stmt         ::= "if" "(" expression ")" block { "maybe" "(" expression ")" block } [ "else" block ]
 loop_stmt       ::= "loop" "(" expression ")" block
 prc_stmt        ::= "prc" identifier "(" [ param_list ] ")" block
 return_stmt     ::= "return" [ expression ]
@@ -9,7 +9,7 @@ break_stmt      ::= "break"
 continue_stmt   ::= "continue"
 var_stmt        ::= "var" identifier "=" expression
 set_stmt        ::= "set" identifier "=" expression
-expression_stmt ::= expression NEWLINE
+expression_stmt ::= expression
 
 param_list      ::= identifier { "," identifier }
 arg_list        ::= expression { "," expression }
