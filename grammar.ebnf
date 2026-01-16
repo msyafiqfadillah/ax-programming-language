@@ -1,44 +1,47 @@
-program       ::= { statement }
+program         ::= { statement }
 
-statement     ::= if_stmt | loop_stmt | return_stmt | var_stmt | set_stmt | prc_stmt | break_stmt | continue_stmt | expression_stmt
-if_stmt       ::= "if" "(" expression block ")" { "maybe" "(" expression ")" block } [ "else" block ]
-loop_stmt     ::= "loop" "(" expression ")" block
-prc_stmt      ::= "prc" identifier "(" [ identifier { "," identifier } ] ")" block
-return_stmt   ::= "return" [ expression ]
-break_stmt    ::= "break"
-continue_stmt ::= "continue"
-var_stmt      ::= "var" identifier "=" expression
-set_stmt      ::= "set" identifier "=" expression
+statement       ::= if_stmt | loop_stmt | return_stmt | var_stmt | set_stmt | prc_stmt | break_stmt | continue_stmt | expression_stmt
+if_stmt         ::= "if" "(" expression block ")" { "maybe" "(" expression ")" block } [ "else" block ]
+loop_stmt       ::= "loop" "(" expression ")" block
+prc_stmt        ::= "prc" identifier "(" [ param_list ] ")" block
+return_stmt     ::= "return" [ expression ]
+break_stmt      ::= "break"
+continue_stmt   ::= "continue"
+var_stmt        ::= "var" identifier "=" expression
+set_stmt        ::= "set" identifier "=" expression
 expression_stmt ::= expression NEWLINE
 
-block         ::= "{" { statement } "}"
-expression    ::= logical_or
+param_list      ::= identifier { "," identifier }
+arg_list        ::= expression { "," expression }
 
-logical_or    ::= logical_and { "||" logical_and }
-logical_and   ::= equality { "&&" equality }
-equality      ::= comparison { ( "==" | "!=" ) comparison }
-comparison    ::= additive { ( ">" | "<" | ">=" | "<=" ) additive }
-additive      ::= multiplicative { ( "+" | "-" ) multiplicative }
-multiplicative::= power { ( "*" | "/" | "%" ) power }
-power         ::= unary [ "^" power ]
-unary         ::= ( "+" | "-" | "!" ) unary | primary
-primary       ::= atom { "(" [ expression { "," expression } ] ")" }
-atom          ::= literal
-                | identifier
-                | "(" expression ")"
-                | list
-                | hashmap
+block           ::= "{" { statement } "}"
+expression      ::= logical_or
 
-list          ::= "|" [ expression { "," expression } ] "|"
-hashmap       ::= "{" [ string "->" expression { "," string "->" expression } ] "}"
+logical_or      ::= logical_and { "||" logical_and }
+logical_and     ::= equality { "&&" equality }
+equality        ::= comparison { ( "==" | "!=" ) comparison }
+comparison      ::= additive { ( ">" | "<" | ">=" | "<=" ) additive }
+additive        ::= multiplicative { ( "+" | "-" ) multiplicative }
+multiplicative  ::= power { ( "*" | "/" | "%" ) power }
+power           ::= unary [ "^" power ]
+unary           ::= ( "+" | "-" | "!" ) unary | primary
+primary         ::= atom { "(" [ arg_list ] ")" }
+atom            ::= literal
+                    | identifier
+                    | "(" expression ")"
+                    | list
+                    | hashmap
 
-literal	      ::= number | string | boolean | "empty" | "undefined"
-string        ::= ('"' | "'") letter { letter } ('"' | "'")
-number        ::= integer | decimal
-integer       ::= [ "-" ] digit+
-decimal       ::= [ "-" ] digit+ "." digit+
-digit         ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-boolean       ::= "true" | "false"
+list            ::= "|" [ expression { "," expression } ] "|"
+hashmap         ::= "{" [ string "->" expression { "," string "->" expression } ] "}"
 
-identifier    ::= ( letter | "_" ) { "_" | letter | digit }
-letter        ::= "a" | ... | "z" | "A" | ... "Z"
+literal	        ::= number | string | boolean | "empty" | "undefined"
+string          ::= ('"' | "'") letter { letter } ('"' | "'")
+number          ::= integer | decimal
+integer         ::= [ "-" ] digit+
+decimal         ::= [ "-" ] digit+ "." digit+
+digit           ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+boolean         ::= "true" | "false"
+
+identifier      ::= ( letter | "_" ) { "_" | letter | digit }
+letter          ::= "a" | ... | "z" | "A" | ... "Z"
