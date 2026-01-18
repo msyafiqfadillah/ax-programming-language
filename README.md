@@ -12,7 +12,7 @@ this is my first attempt of creating a language.
 - [x] function call
 - [x] built-in functions
 - [x] closure
-- [ ] array
+- [ ] list
 - [ ] hashmap
 - [ ] loop
 - [ ] if-else
