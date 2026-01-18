@@ -19,3 +19,4 @@ this is my first attempt of creating a language.
 - [x] return statement
 - [ ] break statement
 - [ ] continue statement
+- [x] boolean
