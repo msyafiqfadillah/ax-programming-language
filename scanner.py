@@ -70,6 +70,9 @@ class Scanner:
                 if (self.peek() == Operators.EQUAL):
                     self.add_token("OPERATOR", Operators.N_EQUAL)
                     self.advance()
+                    continue
+                
+                self.add_token("OPERATOR", Operators.NEGATION)
 
             elif (c_char == Operators.GREATER):
                 if (self.peek() == Operators.EQUAL):
@@ -97,7 +100,7 @@ class Scanner:
 
             elif (c_char == Operators.SUBTRACTION):
                 if (self.peek() == Operators.EQUAL):
-                    self.add_token("OPERATOR",Operators.S_EQUAL)
+                    self.add_token("OPERATOR", Operators.S_EQUAL)
                     self.advance()
                     continue
                 
