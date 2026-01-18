@@ -100,14 +100,14 @@ class Parser:
         return params
     
     def parse_args(self):
-        params = []
+        args = []
 
         while (not helper.is_eof(self.index, self.tokens) and self.peek()["value"] != Punctuations.PARANTHESSES_C):
-            param = self.parse_expression()
+            arg = self.parse_expression()
 
-            params.append(param)
+            args.append(arg)
 
-        return params
+        return args
     
     def parse_return(self):
         self.match(Keywords.RETURN, "value")
@@ -215,7 +215,17 @@ class Parser:
         return node_unary
     
     def parse_unary(self):
-        # TODO : Implement Unary Operator
+        if (not helper.is_eof(self.index, self.tokens) 
+            and self.peek()["value"] in (
+                Operators.NEGATION, 
+                Operators.ADDITION, 
+                Operators.SUBTRACTION
+            )):
+            operator = self.match(self.peek()["value"], "value")
+            right = self.parse_unary()
+
+            return nodes.UnaryExpression(operator["value"], right)
+
         return self.parse_primary()
     
     def parse_primary(self):
@@ -243,7 +253,7 @@ class Parser:
             return nodes.Identifier(current["value"])
         elif (current["value"] == "("):
             self.match(Punctuations.PARANTHESSES_O, "value")
-            expr = self.parse_args()
+            expr = self.parse_expression()
             self.match(Punctuations.PARANTHESSES_C, "value")
 
             return nodes.GroupedExpression(Punctuations.PARANTHESSES_O, expr, Punctuations.PARANTHESSES_C)
@@ -323,6 +333,7 @@ def main():
         {"type": "KEYWORDS", "value": "var"},
         {"type": "IDENTIFIER", "value": "x"},
         {"type": "OPERATOR", "value": "="},
+        {"type": "OPERATOR", "value": "-"},
         {"type": "NUMBER", "value": "6"},
         {"type": "OPERATOR", "value": "<"},
         {"type": "NUMBER", "value": "2"},
