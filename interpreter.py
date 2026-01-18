@@ -1,10 +1,10 @@
 import helper
+import nodes
 
 from tokens.operators import Operators
 from environment import Environment
 from scanner import Scanner
 from parser import Parser
-from nodes import VariableDeclaration, BinaryExpression, Identifier, Literal, GroupedExpression, FunctionDeclaration, ReturnStatement, CallExpression
 
 
 class ReturnException(Exception):
@@ -67,7 +67,7 @@ class Interpreter:
             self.env = parent_env
 
     def eval_statement(self, stmt):
-        if (isinstance(stmt, VariableDeclaration)):
+        if (isinstance(stmt, nodes.VariableDeclaration)):
             name = stmt.declaration.id.name
             value = self.eval_expression(stmt.declaration.init)
 
@@ -85,13 +85,13 @@ class Interpreter:
                 self.env.assign(name, value)
 
                 return value
-        elif (isinstance(stmt, FunctionDeclaration)):
+        elif (isinstance(stmt, nodes.FunctionDeclaration)):
             name = stmt.name.name
             func = FunctionMap(stmt.params, stmt.body, self.env)
             self.env.define(name, func)
 
             return func
-        elif (isinstance(stmt, ReturnStatement)):
+        elif (isinstance(stmt, nodes.ReturnStatement)):
             if (self.env.parent is not None):
                 raise ReturnException()
             else:
@@ -104,7 +104,7 @@ class Interpreter:
         if (isinstance(expr, str) or isinstance(expr, int)):
             return expr
 
-        if (isinstance(expr, Literal)):
+        if (isinstance(expr, nodes.Literal)):
             v = expr.value
 
             # try to convert numeric strings to numbers
@@ -118,7 +118,7 @@ class Interpreter:
 
             return v
 
-        if (isinstance(expr, Identifier)):
+        if (isinstance(expr, nodes.Identifier)):
             name = expr.name
 
             if ((name in self.env.record) or (self.env.parent is not None and name in self.env.parent.record)):
@@ -126,10 +126,10 @@ class Interpreter:
             
             raise NameError(f"Variable '{name}' is not defined")
 
-        if (isinstance(expr, GroupedExpression)):
+        if (isinstance(expr, nodes.GroupedExpression)):
             return self.eval_expression(expr.expr)
 
-        if (isinstance(expr, BinaryExpression)):
+        if (isinstance(expr, nodes.BinaryExpression)):
             left = self.eval_expression(expr.left)
             right = self.eval_expression(expr.right)
             op = expr.operator
@@ -167,7 +167,18 @@ class Interpreter:
 
             raise TypeError(f"Unknown operator {op}")
         
-        if (isinstance(expr, CallExpression)):
+        if (isinstance(expr, nodes.UnaryExpression)):
+            op = expr.operator
+            right = self.eval_expression(expr.value)
+
+            if (op == "+"):
+                return 0 + right
+            if (op == "-"):
+                return 0 - right
+            if (op == "!"):
+                return helper.bool_converter(not helper.is_truhty(right))
+        
+        if (isinstance(expr, nodes.CallExpression)):
             name = expr.callee.name
             result = self.env.lookup(name).call(self, expr.arguments)
 
@@ -186,65 +197,65 @@ global_env = Environment({
 
 
 def main():
-    sample = '''
-        prc test() {
-            var x = 10
-
-            prc inner_test(new_param) {
-                set x = x + new_param
-
-                return x
-            }
-
-            return inner_test
-        }
-
-        var a = test()
-
-        show(a(5))
-        show(a(5))
-        show(2 + 2)
-
-        prc test() {
-            var x = 10
-
-            prc inner_test(new_param) {
-                set x = x + new_param
-
-                return x
-            }
-
-            return inner_test
-        }
-
-        var q = test()
-
-        show(q(5))
-        show(q(5))
-
-        prc make_counter() {
-            var count = 0
-            prc inc() {
-                set count = count + 1
-                return count
-            }
-            return inc
-        }
-
-        var c1 = make_counter()
-        var c2 = make_counter()
-
-        show(c1())
-        show(c1())
-        show(c2())
-        show(c1())
-    '''
-
     # sample = '''
-    #     var m = true && true
+    #     prc test() {
+    #         var x = 10
 
-    #     show(m)
+    #         prc inner_test(new_param) {
+    #             set x = x + new_param
+
+    #             return x
+    #         }
+
+    #         return inner_test
+    #     }
+
+    #     var a = test()
+
+    #     show(a(5))
+    #     show(a(5))
+    #     show(2 + 2)
+
+    #     prc test() {
+    #         var x = 10
+
+    #         prc inner_test(new_param) {
+    #             set x = x + new_param
+
+    #             return x
+    #         }
+
+    #         return inner_test
+    #     }
+
+    #     var q = test()
+
+    #     show(q(5))
+    #     show(q(5))
+
+    #     prc make_counter() {
+    #         var count = 0
+    #         prc inc() {
+    #             set count = count + 1
+    #             return count
+    #         }
+    #         return inc
+    #     }
+
+    #     var c1 = make_counter()
+    #     var c2 = make_counter()
+
+    #     show(c1())
+    #     show(c1())
+    #     show(c2())
+    #     show(c1())
     # '''
+
+    sample = '''
+        var m = (false || !false) && true 
+
+        show(m)
+    '''
 
     interp = Interpreter()
     interp.run(sample)
