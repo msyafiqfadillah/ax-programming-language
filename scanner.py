@@ -1,6 +1,6 @@
 import re
 from tokens.keywords import Keywords
-from tokens.punctions import Punctions 
+from tokens.punctuations import Punctuations 
 from tokens.operators import Operators
 
 
@@ -126,6 +126,17 @@ class Scanner:
                     continue
                 
                 self.add_token("OPERATOR", Operators.MODULO)
+            
+            elif (c_char == Operators.POWER):
+                self.add_token("OPERATOR", Operators.POWER)
+
+            elif (c_char == "|" and self.peek() == "|"):
+                self.add_token("OPERATOR", Operators.OR)
+                self.advance()
+
+            elif (c_char == "&" and self.peek() == "&"):
+                self.add_token("OPERATOR", Operators.AND)
+                self.advance()
 
             # NUMBER
             elif (re.match("[.0-9]", c_char)):
@@ -145,9 +156,9 @@ class Scanner:
                 else:                      # IDENTIFIER
                     self.add_token("IDENTIFIER", rs)
 
-            # PUNCTION
-            elif (c_char in Punctions.all()):
-                self.add_token("PUNCTION", c_char)
+            # PUNCTUATIONS
+            elif (c_char in Punctuations.all()):
+                self.add_token("PUNCTUATIONS", c_char)
 
             else:
                 pass
@@ -158,14 +169,19 @@ class Scanner:
 def main() :
     scanner = Scanner()
 
-    sample = '''
-        prc foo(param_1, param_2) {
-            var new_x = 12
-            set new_x = 99
-            set new_x = (new_x + 2) * 99
-        }
+    # sample = '''
+    #     prc foo(param_1, param_2) {
+    #         var new_x = 12
+    #         set new_x = 99
+    #         set new_x = (new_x + 2) * 99
+    #     }
 
-        foo()
+    #     foo()
+    # '''
+
+    sample = '''
+        var x = 2 * 2 ^ 2
+        var z = 2 < 9
     '''
 
     tokens = scanner.scans(sample)
