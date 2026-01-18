@@ -1,6 +1,10 @@
+import helper
+
+from tokens.operators import Operators
 from environment import Environment
 from scanner import Scanner
-from parser import Parser, VariableDeclaration, BinaryExpression, Identifier, Literal, GroupedExpression, FunctionDeclaration, ReturnStatement, CallExpression
+from parser import Parser
+from nodes import VariableDeclaration, BinaryExpression, Identifier, Literal, GroupedExpression, FunctionDeclaration, ReturnStatement, CallExpression
 
 
 class ReturnException(Exception):
@@ -130,31 +134,36 @@ class Interpreter:
             right = self.eval_expression(expr.right)
             op = expr.operator
 
-            if (op == "+"):
+            if (op == Operators.ADDITION):
                 return left + right
-            if (op == "-"):
+            if (op == Operators.SUBTRACTION):
                 return left - right
-            if (op == "*"):
+            if (op == Operators.MULTIPLICATION):
                 return left * right
-            if (op == "/"):
+            if (op == Operators.DIVISION):
                 return left / right
-            if (op == "%"):
+            if (op == Operators.MODULO):
                 return left % right
-            if (op == "^"):
+            if (op == Operators.POWER):
                 return left ** right
 
-            if (op == ">="):
-                return left >= right
-            if (op == "<="):
-                return left <= right
-            if (op == "=="):
-                return left == right
-            if (op == "!="):
-                return left != right
-            if (op == ">"):
-                return left > right
-            if (op == "<"):
-                return left < right
+            if (op == Operators.G_EQUAL):
+                return helper.bool_converter(left >= right)
+            if (op == Operators.L_EQUAL):
+                return helper.bool_converter(left <= right)
+            if (op == Operators.D_EQUAL):
+                return helper.bool_converter(left == right)
+            if (op == Operators.N_EQUAL):
+                return helper.bool_converter(left != right)
+            if (op == Operators.GREATER):
+                return helper.bool_converter(left > right)
+            if (op == Operators.LESS):
+                return helper.bool_converter(left < right)
+            
+            if (op == Operators.OR):
+                return helper.bool_converter(helper.is_truhty(left) or helper.is_truhty(right))
+            if (op == Operators.AND):
+                return helper.bool_converter(helper.is_truhty(left) and helper.is_truhty(right))
 
             raise TypeError(f"Unknown operator {op}")
         
@@ -230,6 +239,12 @@ def main():
         show(c2())
         show(c1())
     '''
+
+    # sample = '''
+    #     var m = true && true
+
+    #     show(m)
+    # '''
 
     interp = Interpreter()
     interp.run(sample)
