@@ -19,6 +19,8 @@ class Operators:
     NEGATION = "!"
     GREATER = ">"
     LESS = "<"
+    OR = "||"
+    AND = "&&"
 
     @classmethod
     def all(cls):
@@ -36,12 +38,14 @@ class Operators:
             cls.MO_EQUAL,
             cls.ADDITION,
             cls.MULTIPLICATION,
-            cls.SUBTRACT,
+            cls.SUBTRACTION,
             cls.DIVISION,
             cls.POWER,
             cls.MODULO,
             cls.NEGATION,
             cls.GREATER,
-            cls.LESS
+            cls.LESS,
+            cls.OR,
+            cls.AND
         }
 
