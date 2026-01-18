@@ -7,6 +7,10 @@ class Keywords:
     IF = "if"
     MAYBE = "maybe"
     ELSE = "else"
+    TRUE = "true"
+    FALSE = "false"
+    EMPTY = "empty"
+    UNDEFINED = "undefined"
 
     @classmethod
     def all(cls):
@@ -18,5 +22,9 @@ class Keywords:
             cls.RETURN,
             cls.IF,
             cls.MAYBE,
-            cls.ELSE
+            cls.ELSE,
+            cls.TRUE,
+            cls.FALSE,
+            cls.EMPTY,
+            cls.UNDEFINED
         }
