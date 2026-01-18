@@ -2,6 +2,9 @@ class Program:
     def __init__(self, body):
         self.body = body
 
+    def __repr__(self):
+        return f"{self.body}"
+
 class VariableDeclaration:
     def __init__(self, kind, declaration):
         self.kind = kind
@@ -98,3 +101,11 @@ class HashmapExpression:
     
     def __repr__(self):
         return "{" + f", ".join([f"{key} : {value}" for key, value in self.values.items()]) + "}"
+    
+class UnaryExpression:
+    def __init__(self, operator, value):
+        self.operator = operator
+        self.value = value 
+    
+    def __repr__(self):
+        return f"{self.operator}{self.value}"
