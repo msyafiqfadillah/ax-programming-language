@@ -12,7 +12,7 @@ this is my first attempt of creating a language.
 - [x] function call
 - [x] built-in functions
 - [x] closure
-- [ ] list
+- [x] list
 - [ ] hashmap
 - [ ] loop
 - [ ] if-else
@@ -20,3 +20,5 @@ this is my first attempt of creating a language.
 - [ ] break statement
 - [ ] continue statement
 - [x] boolean
+- [ ] list operations
+- [ ] hashmap operations
