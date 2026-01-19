@@ -102,7 +102,7 @@ class Parser:
     def parse_args(self):
         args = []
 
-        while (not helper.is_eof(self.index, self.tokens) and self.peek()["value"] != Punctuations.PARANTHESSES_C):
+        while (not helper.is_eof(self.index, self.tokens) and self.peek()["value"] not in (Punctuations.V_LINE, Punctuations.PARANTHESSES_C)):
             arg = self.parse_expression()
 
             args.append(arg)
