@@ -38,6 +38,15 @@ class BuiltinMap:
         evaluated_args = [interpreter.eval_expression(expr) for expr in args]
 
         return self.func(*evaluated_args)
+    
+class ListValue:
+    def __init__(self, atoms):
+        self.atoms = atoms 
+    
+    def __repr__(self):
+        rep = f"| {", ".join([str(expr) for expr in self.atoms])} |"
+
+        return rep
 
 class Interpreter:
     def __init__(self):
@@ -184,7 +193,10 @@ class Interpreter:
 
             return result
         
-        if (isinstance(expr, FunctionMap)):
+        if (isinstance(expr, nodes.ListExpression)):
+            return ListValue([self.eval_expression(e) for e in expr.atoms])
+
+        if (isinstance(expr, (FunctionMap, ListValue))):
             return expr
 
         raise TypeError(f"Unknown expression type: {expr}")
@@ -252,7 +264,8 @@ def main():
     # '''
 
     sample = '''
-        var m = (false || !false) && true 
+        var z = 3
+        var m = | z, 2, 3, 4 |
 
         show(m)
     '''
