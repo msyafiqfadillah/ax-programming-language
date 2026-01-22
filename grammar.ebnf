@@ -24,8 +24,8 @@ comparison      ::= additive { ( ">" | "<" | ">=" | "<=" ) additive }
 additive        ::= multiplicative { ( "+" | "-" ) multiplicative }
 multiplicative  ::= power { ( "*" | "/" | "%" ) power }
 power           ::= unary [ "^" power ]
-unary           ::= ( "+" | "-" | "!" ) unary | primary
-primary         ::= atom { "(" [ arg_list ] ")" }
+unary           ::= ( "+" | "-" | "!" ) unary | postfix_exp
+postfix_exp     ::= atom { "[" expression "]" | "[" expression ":" expression "]" | "(" [ arg_list ] ")" }
 atom            ::= literal
                     | identifier
                     | "(" expression ")"
