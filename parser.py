@@ -226,19 +226,48 @@ class Parser:
 
             return nodes.UnaryExpression(operator["value"], right)
 
-        return self.parse_primary()
+        return self.parse_postfix()
     
-    def parse_primary(self):
-        node_atom = self.parse_atom()
+    def parse_postfix(self):
+        left = self.parse_atom()
 
-        if (not helper.is_eof(self.index, self.tokens) and self.peek()["value"] == Punctuations.PARANTHESSES_O):
-            self.match(Punctuations.PARANTHESSES_O, "value")
-            args = self.parse_args()
-            self.match(Punctuations.PARANTHESSES_C, "value")
+        while (not helper.is_eof(self.index, self.tokens) 
+               and self.peek()["value"] in (
+                   Punctuations.SQUARE_O,
+                   Punctuations.PARANTHESSES_O
+                )):
+            paran = self.match(self.peek()["value"], "value")
 
-            return nodes.CallExpression(node_atom, args)
+            if (paran["value"] == Punctuations.PARANTHESSES_O):
+                args = self.parse_args()
+                self.match(Punctuations.PARANTHESSES_C, "value")
+
+                return nodes.CallExpression(left, args)
+            elif (paran["value"]  == Punctuations.SQUARE_O):
+                f_exp = self.parse_expression()
+                s_exp = None
+
+                if (self.peek()["value"] == Punctuations.COLON):
+                    self.match(Punctuations.COLON, "value")
+                    s_exp = self.parse_expression()
+
+                self.match(Punctuations.SQUARE_C, "value")
+
+                return nodes.PostfixExpression(left, f_exp, s_exp)
+
+        return left
+    
+    # def parse_primary(self):
+    #     node_atom = self.parse_atom()
+
+    #     if (not helper.is_eof(self.index, self.tokens) and self.peek()["value"] == Punctuations.PARANTHESSES_O):
+    #         self.match(Punctuations.PARANTHESSES_O, "value")
+    #         args = self.parse_args()
+    #         self.match(Punctuations.PARANTHESSES_C, "value")
+
+    #         return nodes.CallExpression(node_atom, args)
         
-        return node_atom
+    #     return node_atom
     
     def parse_atom(self):
         current = self.peek()
@@ -262,7 +291,7 @@ class Parser:
         elif (current["value"] == Punctuations.SQUARE_O):
             return self.parse_hashmap()
 
-        # raise TypeError(f"Expected atom, but got {current["value"]}")
+        raise TypeError(f"Expected atom, but got {current["value"]}")
 
     def parse_list(self):
         self.match(Punctuations.V_LINE, "value")

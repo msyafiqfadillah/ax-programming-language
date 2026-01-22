@@ -42,6 +42,9 @@ class BuiltinMap:
 class ListValue:
     def __init__(self, atoms):
         self.atoms = atoms 
+
+    def indexAt(self, interpreter, index):
+        return self.atoms[interpreter.eval_expression(index)]
     
     def __repr__(self):
         rep = f"| {", ".join([str(expr) for expr in self.atoms])} |"
@@ -195,6 +198,9 @@ class Interpreter:
         
         if (isinstance(expr, nodes.ListExpression)):
             return ListValue([self.eval_expression(e) for e in expr.atoms])
+        
+        if (isinstance(expr, nodes.PostfixExpression)):
+            return self.eval_expression(expr.exp).indexAt(self, expr.start_exp)
 
         if (isinstance(expr, (FunctionMap, ListValue))):
             return expr
@@ -264,10 +270,11 @@ def main():
     # '''
 
     sample = '''
-        var z = 3
-        var m = | z, 2, 3, 4 |
+        var z = 10
+        var m = ||1, 9, 3, 4, 0|, | z, 2, 3, 4 ||
+        var f = m[0]
 
-        show(m)
+        show(f)
     '''
 
     interp = Interpreter()

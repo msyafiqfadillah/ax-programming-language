@@ -109,3 +109,12 @@ class UnaryExpression:
     
     def __repr__(self):
         return f"{self.operator}{self.value}"
+    
+class PostfixExpression:
+    def __init__(self, exp, start_exp, end_exp=None):
+        self.exp = exp
+        self.start_exp = start_exp
+        self.end_exp = end_exp
+
+    def __repr__(self):
+        return f"{self.exp}[{self.start_exp}{f":{self.end_exp}" if self.end_exp is not None else ""}]"
