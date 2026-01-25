@@ -11,7 +11,7 @@ class ReturnException(Exception):
     def __init__(self):
         pass
 
-class FunctionMap:
+class FunctionValue:
     def __init__(self, params, body, parent_env):
         self.params = params 
         self.body = body
@@ -99,7 +99,7 @@ class Interpreter:
                 return value
         elif (isinstance(stmt, nodes.FunctionDeclaration)):
             name = stmt.name.name
-            func = FunctionMap(stmt.params, stmt.body, self.env)
+            func = FunctionValue(stmt.params, stmt.body, self.env)
             self.env.define(name, func)
 
             return func
@@ -191,8 +191,12 @@ class Interpreter:
                 return helper.bool_converter(not helper.is_truhty(right))
         
         if (isinstance(expr, nodes.CallExpression)):
-            name = expr.callee.name
-            result = self.env.lookup(name).call(self, expr.arguments)
+            if (isinstance(expr.callee, nodes.CallExpression)):
+                result = self.eval_expression(expr.callee)
+            else:
+                result = self.env.lookup(expr.callee.name)
+
+            result = result.call(self, expr.arguments)
 
             return result
         
@@ -202,7 +206,7 @@ class Interpreter:
         if (isinstance(expr, nodes.PostfixExpression)):
             return self.eval_expression(expr.exp).indexAt(self, expr.start_exp)
 
-        if (isinstance(expr, (FunctionMap, ListValue))):
+        if (isinstance(expr, (FunctionValue, ListValue))):
             return expr
 
         raise TypeError(f"Unknown expression type: {expr}")
@@ -283,13 +287,17 @@ def main():
     sample = '''
         prc x() {
             prc z() {
-                return 777
+                return [1, 2, 3, 100, 99, 98]
             }
 
             return z
         }
 
-        x()()
+        prc o() {
+            return 222
+        }
+
+        show(x()()[2])
     '''
 
     interp = Interpreter()

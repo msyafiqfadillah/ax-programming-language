@@ -45,11 +45,11 @@ class Parser:
             return self.parse_function()
         elif (current_token["value"] == Keywords.RETURN):
             return self.parse_return()
-        elif (current_token["type"] == "IDENTIFIER" or current_token["type"] == "NUMBER"):
-        # else:
+        # elif (current_token["type"] == "IDENTIFIER" or current_token["type"] == "NUMBER"):
+        else:
             return self.parse_expression()
 
-        raise TypeError(f"Unknown statement starting with {self.peek()["value"]}")
+        # raise TypeError(f"Unknown statement starting with {self.peek()["value"]}")
 
     def parse_var(self):
         self.match(Keywords.VAR, "value")
@@ -242,7 +242,7 @@ class Parser:
                 args = self.parse_args()
                 self.match(Punctuations.PARANTHESSES_C, "value")
 
-                return nodes.CallExpression(left, args)
+                left = nodes.CallExpression(left, args)
             elif (paran["value"]  == Punctuations.SQUARE_O):
                 f_exp = self.parse_expression()
                 s_exp = None
@@ -253,7 +253,7 @@ class Parser:
 
                 self.match(Punctuations.SQUARE_C, "value")
 
-                return nodes.PostfixExpression(left, f_exp, s_exp)
+                left = nodes.PostfixExpression(left, f_exp, s_exp)
 
         return left
     
