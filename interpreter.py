@@ -47,7 +47,7 @@ class ListValue:
         return self.atoms[interpreter.eval_expression(index)]
     
     def __repr__(self):
-        rep = f"| {", ".join([str(expr) for expr in self.atoms])} |"
+        rep = f"[ {", ".join([str(expr) for expr in self.atoms])} ]"
 
         return rep
 
@@ -269,12 +269,27 @@ def main():
     #     show(c1())
     # '''
 
-    sample = '''
-        var z = 10
-        var m = ||1, 9, 3, 4, 0|, | z, 2, 3, 4 ||
-        var f = m[0]
+    # sample = '''
+    #     prc x() {
+    #         return 555
+    #     }
 
-        show(f)
+    #     var z = 10
+    #     var m = [[1, 2, 3, x()], [777, 888]]
+
+    #     show(m[0][0])
+    # '''
+
+    sample = '''
+        prc x() {
+            prc z() {
+                return 777
+            }
+
+            return z
+        }
+
+        x()()
     '''
 
     interp = Interpreter()

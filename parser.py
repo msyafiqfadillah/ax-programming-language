@@ -102,7 +102,7 @@ class Parser:
     def parse_args(self):
         args = []
 
-        while (not helper.is_eof(self.index, self.tokens) and self.peek()["value"] not in (Punctuations.V_LINE, Punctuations.PARANTHESSES_C)):
+        while (not helper.is_eof(self.index, self.tokens) and self.peek()["value"] != Punctuations.PARANTHESSES_C):
             arg = self.parse_expression()
 
             args.append(arg)
@@ -286,19 +286,29 @@ class Parser:
             self.match(Punctuations.PARANTHESSES_C, "value")
 
             return nodes.GroupedExpression(Punctuations.PARANTHESSES_O, expr, Punctuations.PARANTHESSES_C)
-        elif (current["value"] == Punctuations.V_LINE):
-            return self.parse_list()
         elif (current["value"] == Punctuations.SQUARE_O):
+            return self.parse_list()
+        elif (current["value"] == Punctuations.CURVED_O):
             return self.parse_hashmap()
 
         raise TypeError(f"Expected atom, but got {current["value"]}")
 
     def parse_list(self):
-        self.match(Punctuations.V_LINE, "value")
-        expr = self.parse_args()
-        self.match(Punctuations.V_LINE, "value")
+        expr_lst = []
+        
+        self.match(Punctuations.SQUARE_O, "value")
+        
+        while (not helper.is_eof(self.index, self.tokens) and self.peek()["value"] != Punctuations.SQUARE_C):
+            if (self.peek()["value"] == Punctuations.SQUARE_O):
+                expr = self.parse_list()
+            else:
+                expr = self.parse_expression()
+            
+            expr_lst.append(expr)
 
-        return nodes.ListExpression(expr)
+        self.match(Punctuations.SQUARE_C, "value")
+
+        return nodes.ListExpression(expr_lst)
 
     def parse_hashmap(self):
         self.match(Punctuations.CURVED_O, "value")

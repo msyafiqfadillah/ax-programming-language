@@ -93,7 +93,7 @@ class ListExpression:
         self.atoms = atoms
 
     def __repr__(self):
-        return f"| {", ".join(repr(s) for s in self.atoms)} |"
+        return f"[ {", ".join(repr(s) for s in self.atoms)} ]"
     
 class HashmapExpression:
     def __init__(self, values):
