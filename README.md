@@ -20,5 +20,9 @@ this is my first attempt of creating a language.
 - [ ] break statement
 - [ ] continue statement
 - [x] boolean
-- [ ] list operations
+- [ ] list operations 
+    - [x] indexing
+    - [x] slicing
+    - [ ] append
+    - [ ] mutation with index
 - [ ] hashmap operations
