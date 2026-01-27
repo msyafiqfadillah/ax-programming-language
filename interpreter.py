@@ -43,8 +43,17 @@ class ListValue:
     def __init__(self, atoms):
         self.atoms = atoms 
 
+    def operate(self, interpreter, start, end=None):
+        if (end is None):
+            return self.indexAt(interpreter, start)
+        else:
+            return self.slice(interpreter, start, end)
+
     def indexAt(self, interpreter, index):
         return self.atoms[interpreter.eval_expression(index)]
+    
+    def slice(self, interpreter, start, end):
+        return ListValue(self.atoms[interpreter.eval_expression(start):interpreter.eval_expression(end)])
     
     def __repr__(self):
         rep = f"[ {", ".join([str(expr) for expr in self.atoms])} ]"
@@ -201,10 +210,12 @@ class Interpreter:
             return result
         
         if (isinstance(expr, nodes.ListExpression)):
+            print(123, expr)
+
             return ListValue([self.eval_expression(e) for e in expr.atoms])
         
         if (isinstance(expr, nodes.PostfixExpression)):
-            return self.eval_expression(expr.exp).indexAt(self, expr.start_exp)
+            return self.eval_expression(expr.exp).operate(self, expr.start_exp, expr.end_exp)
 
         if (isinstance(expr, (FunctionValue, ListValue))):
             return expr
@@ -287,7 +298,7 @@ def main():
     sample = '''
         prc x() {
             prc z() {
-                return [1, 2, 3, 100, 99, 98]
+                return [[1, 2, 3, 100, 99, 98], [44, 33, 12]]
             }
 
             return z
@@ -297,7 +308,7 @@ def main():
             return 222
         }
 
-        show(x()()[2])
+        show(x()()[0:3][1][0:2][0])
     '''
 
     interp = Interpreter()
