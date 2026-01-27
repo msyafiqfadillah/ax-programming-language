@@ -257,18 +257,6 @@ class Parser:
 
         return left
     
-    # def parse_primary(self):
-    #     node_atom = self.parse_atom()
-
-    #     if (not helper.is_eof(self.index, self.tokens) and self.peek()["value"] == Punctuations.PARANTHESSES_O):
-    #         self.match(Punctuations.PARANTHESSES_O, "value")
-    #         args = self.parse_args()
-    #         self.match(Punctuations.PARANTHESSES_C, "value")
-
-    #         return nodes.CallExpression(node_atom, args)
-        
-    #     return node_atom
-    
     def parse_atom(self):
         current = self.peek()
         
