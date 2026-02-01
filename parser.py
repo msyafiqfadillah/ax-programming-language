@@ -92,10 +92,13 @@ class Parser:
     def parse_params(self):
         params = []
 
-        while (self.peek()["type"] == "IDENTIFIER"):
+        while (not helper.is_eof(self.index, self.tokens) and self.peek()["type"] == "IDENTIFIER"):
             param = self.match("IDENTIFIER", "type")["value"]
 
             params.append(nodes.Identifier(param))
+
+            if (self.peek()["value"] != Punctuations.PARANTHESSES_C):
+                self.match(Punctuations.COMMA, "value")
 
         return params
     
@@ -106,6 +109,9 @@ class Parser:
             arg = self.parse_expression()
 
             args.append(arg)
+
+            if (self.peek()["value"] != Punctuations.PARANTHESSES_C):
+                self.match(Punctuations.COMMA, "value")
 
         return args
     
@@ -291,8 +297,11 @@ class Parser:
                 expr = self.parse_list()
             else:
                 expr = self.parse_expression()
-            
+
             expr_lst.append(expr)
+
+            if (self.peek()["value"] != Punctuations.SQUARE_C):
+                self.match(Punctuations.COMMA, "value")
 
         self.match(Punctuations.SQUARE_C, "value")
 
