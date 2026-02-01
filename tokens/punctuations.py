@@ -7,6 +7,7 @@ class Punctuations:
     SQUARE_C = "]"
     V_LINE = "|"
     COLON = ":"
+    COMMA = ","
 
     @classmethod
     def all(cls):
@@ -18,6 +19,7 @@ class Punctuations:
             cls.SQUARE_O,
             cls.SQUARE_C,
             cls.V_LINE,
-            cls.COLON
+            cls.COLON,
+            cls.COMMA
         }
 
