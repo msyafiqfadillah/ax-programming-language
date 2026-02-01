@@ -23,6 +23,6 @@ this is my first attempt of creating a language.
 - [ ] list operations 
     - [x] indexing
     - [x] slicing
-    - [ ] append
+    - [x] push
     - [x] mutation with index
 - [ ] hashmap operations

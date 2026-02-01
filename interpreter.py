@@ -58,6 +58,9 @@ class ListValue:
     def slice(self, interpreter, start, end):
         return ListValue(self.atoms[interpreter.eval_expression(start):interpreter.eval_expression(end)])
     
+    def push(self, value):
+        self.atoms.append(value)
+
     def __repr__(self):
         rep = f"[ {", ".join([str(expr) for expr in self.atoms])} ]"
 
@@ -252,7 +255,8 @@ class Interpreter:
 
 global_env = Environment({
     "show": BuiltinMap(lambda *args : print(*args)),
-    "length": BuiltinMap(lambda arg : len(arg))
+    "length": BuiltinMap(lambda arg : len(arg)),
+    "push": BuiltinMap(lambda list_value, *args : list(map(list_value.push, args)))
 })
 
 
@@ -343,6 +347,8 @@ def main():
 
         set g[0][1] = [9, 0, 7]
 
+        show(g)
+        push(g[0][1], 22)
         show(g)
     '''
 
