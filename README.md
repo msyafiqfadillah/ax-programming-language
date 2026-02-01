@@ -26,3 +26,4 @@ this is my first attempt of creating a language.
     - [x] push
     - [x] mutation with index
 - [ ] hashmap operations
+- [ ] better error message
