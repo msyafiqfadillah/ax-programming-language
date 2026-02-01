@@ -24,5 +24,5 @@ this is my first attempt of creating a language.
     - [x] indexing
     - [x] slicing
     - [ ] append
-    - [ ] mutation with index
+    - [x] mutation with index
 - [ ] hashmap operations

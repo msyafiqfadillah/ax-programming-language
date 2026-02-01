@@ -61,12 +61,12 @@ class Parser:
     
     def parse_set(self):
         self.match(Keywords.SET, "value")
-        identifier = self.match("IDENTIFIER", "type")
+        postfix = self.parse_postfix()
         self.match(Operators.EQUAL, "value")
         expression = self.parse_expression()
 
-        return nodes.VariableDeclaration(kind="set", declaration=nodes.VariableDeclarator(id=nodes.Identifier(name=identifier["value"]), init=expression))
-    
+        return nodes.VariableDeclaration(kind="set", declaration=nodes.VariableDeclarator(id=postfix, init=expression))
+
     def parse_function(self):
         self.match(Keywords.PRC, "value")
         identifier = self.match("IDENTIFIER", "type")

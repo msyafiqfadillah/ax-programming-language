@@ -52,6 +52,9 @@ class ListValue:
     def indexAt(self, interpreter, index):
         return self.atoms[interpreter.eval_expression(index)]
     
+    def replaceAt(self, index, value):
+        self.atoms[index] = value
+    
     def slice(self, interpreter, start, end):
         return ListValue(self.atoms[interpreter.eval_expression(start):interpreter.eval_expression(end)])
     
@@ -73,6 +76,27 @@ class Interpreter:
 
         return self.env.record
     
+    def resolve_assignment(self, node):
+        if (isinstance(node, nodes.Identifier)):
+            name = node.name
+
+            if (not self.env.resolve(name)):
+                raise NameError(f"Variable {name} is not defined")
+
+            return ("env", name)
+        
+        if (isinstance(node, nodes.PostfixExpression)):
+            container, key = self.resolve_assignment(node.exp)
+
+            if (container == "env"):
+                parent_value = self.env.lookup(key)
+            else:
+                parent_value = container.indexAt(self, key)
+
+            index = self.eval_expression(node.start_exp)
+
+            return (parent_value, index)
+    
     def eval_block(self, stmts, local_env):
         parent_env = self.env
         self.env = local_env
@@ -89,10 +113,12 @@ class Interpreter:
 
     def eval_statement(self, stmt):
         if (isinstance(stmt, nodes.VariableDeclaration)):
-            name = stmt.declaration.id.name
-            value = self.eval_expression(stmt.declaration.init)
+            id = stmt.declaration.id
 
             if (stmt.kind == "var"):
+                name = id.name
+                value = self.eval_expression(stmt.declaration.init)
+
                 if ((name in self.env.record) or (self.env.parent is not None and name in self.env.parent.record)):
                     raise NameError(f"Variable '{name}' already declared")
 
@@ -100,10 +126,13 @@ class Interpreter:
                 
                 return value
             elif (stmt.kind == "set"):
-                if (not self.env.resolve(name)):
-                    raise NameError(f"Variable '{name}' is not defined")
+                container, key = self.resolve_assignment(id)
+                value = self.eval_expression(stmt.declaration.init)
 
-                self.env.assign(name, value)
+                if (container == "env"):
+                    self.env.assign(key, value)
+                else:
+                    container.replaceAt(key, value)
 
                 return value
         elif (isinstance(stmt, nodes.FunctionDeclaration)):
@@ -210,8 +239,6 @@ class Interpreter:
             return result
         
         if (isinstance(expr, nodes.ListExpression)):
-            print(123, expr)
-
             return ListValue([self.eval_expression(e) for e in expr.atoms])
         
         if (isinstance(expr, nodes.PostfixExpression)):
@@ -308,7 +335,15 @@ def main():
             return 222
         }
 
+        var p = [1, 2, 3, 4]
+        var g = x()()
+
         show(x()()[0:3][1][0:2][0])
+        show(g[0])
+
+        set g[0][1] = [9, 0, 7]
+
+        show(g)
     '''
 
     interp = Interpreter()
