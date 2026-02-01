@@ -20,7 +20,7 @@ this is my first attempt of creating a language.
 - [ ] break statement
 - [ ] continue statement
 - [x] boolean
-- [ ] list operations 
+- [x] list operations 
     - [x] indexing
     - [x] slicing
     - [x] push
