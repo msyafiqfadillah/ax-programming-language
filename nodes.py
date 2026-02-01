@@ -11,7 +11,7 @@ class VariableDeclaration:
         self.declaration = declaration
 
     def __repr__(self):
-        return f"{self.kind} {self.declaration.id.name} = {self.declaration.init}"
+        return f"{self.kind} {self.declaration.id} = {self.declaration.init}"
 
 class VariableDeclarator:
     def __init__(self, id, init):
