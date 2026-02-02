@@ -13,7 +13,7 @@ this is my first attempt of creating a language.
 - [x] built-in functions
 - [x] closure
 - [x] list
-- [ ] hashmap
+- [x] hashmap
 - [ ] loop
 - [ ] if-else
 - [x] return statement
