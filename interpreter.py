@@ -327,6 +327,12 @@ def main():
     # '''
 
     sample = '''
+        ~ This is a example of comment ~
+        ~
+            You can use it as one line comment or multiline 
+        ~
+        # Or you can use hashtag as one line comment
+        
         prc x() {
             prc z() {
                 return [[1, 2, 3, 100, 99, 98], [44, 33, 12]]
@@ -342,14 +348,14 @@ def main():
         var p = [1, 2, 3, 4]
         var g = x()()
 
-        show(x()()[0:3][1][0:2][0])
+        ~ show(x()()[0:3][1][0:2][0]) ~
         show(g[0])
 
         set g[0][1] = [9, 0, 7]
 
         show(g)
-        push(g[0][1], 22)
-        show(g)
+        # push(g[0][1], 22)
+        # show(g)
     '''
 
     interp = Interpreter()

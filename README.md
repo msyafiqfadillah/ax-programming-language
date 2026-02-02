@@ -27,4 +27,6 @@ this is my first attempt of creating a language.
     - [x] mutation with index
 - [ ] hashmap operations
 - [ ] better error message
-- [ ] comment
+- [x] comment
+    - [x] oneline comment
+    - [x] multiline comment

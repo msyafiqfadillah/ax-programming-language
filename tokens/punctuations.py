@@ -8,6 +8,8 @@ class Punctuations:
     V_LINE = "|"
     COLON = ":"
     COMMA = ","
+    FLAG = "~"
+    HASHTAG = "#"
 
     @classmethod
     def all(cls):
@@ -20,6 +22,8 @@ class Punctuations:
             cls.SQUARE_C,
             cls.V_LINE,
             cls.COLON,
-            cls.COMMA
+            cls.COMMA,
+            cls.FLAG,
+            cls.HASHTAG
         }
 
