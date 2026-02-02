@@ -8,6 +8,23 @@ this is my first attempt of creating a language.
 show("Hello, World!")
 ```
 
+## Literals
+
+```
+# Numbers
+90
+
+# Floating Number
+90.7
+
+# String
+"Your other programming language"
+
+# Boolean
+true
+false
+```
+
 ## Comments
 
 ```
