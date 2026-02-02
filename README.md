@@ -2,6 +2,91 @@
 
 this is my first attempt of creating a language.
 
+## Hello World
+
+```
+show("Hello, World!")
+```
+
+## Comments
+
+```
+# Oneline Comment
+
+~ Multiline Comment ~
+```
+
+## Variable Declaration & Assignment
+
+```
+var name = "Alexander The Great"
+
+show(name)
+
+set name = "Marcus Aurelius"
+
+show(name)
+```
+
+## Function
+
+```
+prc power(x) {
+    return x ^ 2
+}
+
+var result = new_func(9)
+
+show(result)
+```
+
+## Closures
+
+```
+prc outer() {
+    var counter = 0
+
+    prc inner() {
+        set counter = counter + 1
+
+        return counter
+    }
+
+    return inner
+}
+
+var dec_outer = outer()
+
+show(dec_outer())
+show(dec_outer())
+```
+
+## Collections
+
+```
+# list declaration
+var n_number = [1, 2, 3, 4, 5]
+
+# mutation by index
+set n_number[0] = [99, 98]
+
+# indexing
+show(n_number[0])
+
+show(n_number)
+
+# hashmap declaration
+var book = { "id" : 1, "name" : "Andrew" }
+
+# mutation by key
+set book["id"] = 888
+
+# get value by key
+show(book["id"])
+
+show(book)
+```
+
 ## TODO
 - [x] syntax
 - [x] lexer
