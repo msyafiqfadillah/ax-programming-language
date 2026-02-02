@@ -26,6 +26,8 @@ this is my first attempt of creating a language.
     - [x] push
     - [x] mutation with index
 - [ ] hashmap operations
+    - [ ] get value by key
+    - [ ] mutation by key
 - [ ] better error message
 - [x] comment
     - [x] oneline comment
