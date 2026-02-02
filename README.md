@@ -14,7 +14,7 @@ show("Hello, World!")
 # Integer
 90
 
-# Floating Number
+# Floating-point Number
 90.7
 
 # String
