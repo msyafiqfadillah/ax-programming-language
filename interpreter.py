@@ -65,6 +65,15 @@ class ListValue:
         rep = f"[ {", ".join([str(expr) for expr in self.atoms])} ]"
 
         return rep
+    
+class HashmapValue:
+    def __init__(self, values):
+        self.values = values
+
+    def __repr__(self):
+        rep = "{ " + f"{", ".join([f"{key} : {value}" for key, value in self.values.items()])}" + " }"
+
+        return rep
 
 class Interpreter:
     def __init__(self):
@@ -244,10 +253,13 @@ class Interpreter:
         if (isinstance(expr, nodes.ListExpression)):
             return ListValue([self.eval_expression(e) for e in expr.atoms])
         
+        if (isinstance(expr, nodes.HashmapExpression)):
+            return HashmapValue({self.eval_expression(key) : self.eval_expression(value) for key, value in expr.values.items()})
+        
         if (isinstance(expr, nodes.PostfixExpression)):
             return self.eval_expression(expr.exp).operate(self, expr.start_exp, expr.end_exp)
 
-        if (isinstance(expr, (FunctionValue, ListValue))):
+        if (isinstance(expr, (FunctionValue, ListValue, HashmapValue))):
             return expr
 
         raise TypeError(f"Unknown expression type: {expr}")
@@ -356,6 +368,10 @@ def main():
         show(g)
         # push(g[0][1], 22)
         # show(g)
+
+        var ttt = { 123 : 123, "uuu" : 999 }
+
+        show(ttt)
     '''
 
     interp = Interpreter()
