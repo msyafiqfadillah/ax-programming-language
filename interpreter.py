@@ -70,6 +70,12 @@ class HashmapValue:
     def __init__(self, values):
         self.values = values
 
+    def valueAt(self, interpreter, key):
+        return self.values[interpreter.eval_expression(key)]
+    
+    def replaceAt(self, key, value):
+        self.values[key] = value
+
     def __repr__(self):
         rep = "{ " + f"{", ".join([f"{key} : {value}" for key, value in self.values.items()])}" + " }"
 
@@ -257,7 +263,12 @@ class Interpreter:
             return HashmapValue({self.eval_expression(key) : self.eval_expression(value) for key, value in expr.values.items()})
         
         if (isinstance(expr, nodes.PostfixExpression)):
-            return self.eval_expression(expr.exp).operate(self, expr.start_exp, expr.end_exp)
+            eval_expr = self.eval_expression(expr.exp)
+
+            if (isinstance(eval_expr, ListValue)):
+                return eval_expr.operate(self, expr.start_exp, expr.end_exp)
+            elif (isinstance(eval_expr, HashmapValue)):
+                return eval_expr.valueAt(self, expr.start_exp)
 
         if (isinstance(expr, (FunctionValue, ListValue, HashmapValue))):
             return expr
@@ -341,7 +352,8 @@ def main():
     sample = '''
         ~ This is a example of comment ~
         ~
-            You can use it as one line comment or multiline 
+            You can use it as one line comment or multiline,
+            like this.
         ~
         # Or you can use hashtag as one line comment
         
@@ -370,6 +382,10 @@ def main():
         # show(g)
 
         var ttt = { 123 : 123, "uuu" : 999 }
+
+        show(ttt[123])
+
+        set ttt[123] = 5000
 
         show(ttt)
     '''
