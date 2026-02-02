@@ -11,7 +11,7 @@ show("Hello, World!")
 ## Literals
 
 ```
-# Numbers
+# Integer
 90
 
 # Floating Number
