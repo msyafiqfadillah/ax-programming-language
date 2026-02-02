@@ -52,7 +52,7 @@ prc power(x) {
     return x ^ 2
 }
 
-var result = new_func(9)
+var result = power(9)
 
 show(result)
 ```
