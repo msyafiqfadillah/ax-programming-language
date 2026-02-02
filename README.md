@@ -73,6 +73,9 @@ set n_number[0] = [99, 98]
 # indexing
 show(n_number[0])
 
+# slicing 
+show(n_number[0:2])
+
 show(n_number)
 
 # hashmap declaration
