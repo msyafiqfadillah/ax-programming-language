@@ -20,6 +20,16 @@ class Parser:
         
         raise TypeError(f"Expected token {expected}, but got {c_token["value"]}")
 
+    def match_assignment(self):
+        c_token = self.peek()
+
+        if (c_token["value"] in (Operators.EQUAL, Operators.A_EQUAL, Operators.M_EQUAL, Operators.S_EQUAL, Operators.D_EQUAL, Operators.P_EQUAL, Operators.MO_EQUAL)):
+            self.index += 1
+
+            return c_token
+        else:
+            raise TypeError(f"Expected token assignment, but got {c_token["value"]}")
+
     def peek(self):        
         return self.tokens[self.index]
 
@@ -57,15 +67,15 @@ class Parser:
         self.match(Operators.EQUAL, "value")
         expression = self.parse_expression()
 
-        return nodes.VariableDeclaration(kind="var", declaration=nodes.VariableDeclarator(id=nodes.Identifier(name=identifier["value"]), init=expression))
+        return nodes.VariableDeclaration(declaration=nodes.VariableDeclarator(id=nodes.Identifier(name=identifier["value"]), init=expression))
     
     def parse_set(self):
         self.match(Keywords.SET, "value")
         postfix = self.parse_postfix()
-        self.match(Operators.EQUAL, "value")
+        operator = self.match_assignment()
         expression = self.parse_expression()
 
-        return nodes.VariableDeclaration(kind="set", declaration=nodes.VariableDeclarator(id=postfix, init=expression))
+        return nodes.VariableAssignment(operator=operator, declaration=nodes.VariableDeclarator(id=postfix, init=expression))
 
     def parse_function(self):
         self.match(Keywords.PRC, "value")
