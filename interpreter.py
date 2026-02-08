@@ -401,14 +401,21 @@ def main():
         push(g[0][1], 22)
         show(g)
 
-        if (1 > 0) {
-            show(true)
-        } maybe (false) {
-            show(123)
-        } maybe (false) {
-            show(222)
+        ~
+            example of if else in ax (written with neovim)
+        ~
+
+        var nine = 9
+        var eight = 8
+
+        if (nine >= eight) {
+            show("yes, it's bigger")
+        } maybe (nine <= eight) {
+            show("no, it's not bigger")
+        } maybe (nine == eight) {
+            show("also not equal")
         } whatever {
-            show(999)
+            show("how?!")
         }
     '''
 
