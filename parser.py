@@ -350,11 +350,14 @@ class Parser:
         items = { }
 
         while (not helper.is_eof(self.index, self.tokens) and self.peek()["value"] != Punctuations.CURVED_C):
-            key = self.match("STRING", "type")
+            key = self.parse_expression()
             self.match(":", "value")
             value = self.parse_expression()
 
             items[key] = value
+
+            if (self.peek()["value"] != Punctuations.CURVED_C):
+                self.match(Punctuations.COMMA, "value")
 
         self.match(Punctuations.CURVED_C, "value")
 

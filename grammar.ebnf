@@ -33,7 +33,7 @@ atom            ::= literal
                     | hashmap
 
 list            ::= "|" [ expression { "," expression } ] "|"
-hashmap         ::= "{" [ string ":" expression { "," string ":" expression } ] "}"
+hashmap         ::= "{" [ expression ":" expression { "," string ":" expression } ] "}"
 
 literal	        ::= number | string | boolean | "empty" | "undefined"
 string          ::= ('"' | "'") letter { letter } ('"' | "'")

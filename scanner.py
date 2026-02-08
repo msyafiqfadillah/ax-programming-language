@@ -57,6 +57,22 @@ class Scanner:
             if (c_char.isspace()):
                 continue
 
+            if (c_char == Punctuations.FLAG):
+                while (not self.is_eof() and self.peek() != Punctuations.FLAG):
+                    self.advance()
+
+                if (self.is_eof()):
+                    raise TypeError("Missing closing FLAG '~'")
+
+                self.advance()
+
+                continue
+
+            if (c_char == Punctuations.HASHTAG):
+                while (self.advance() != "\n"):
+                    continue
+                continue
+
             # OPERATOR
             if (c_char == Operators.EQUAL):
                 if (self.peek() == Operators.EQUAL):

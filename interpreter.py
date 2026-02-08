@@ -65,6 +65,21 @@ class ListValue:
         rep = f"[ {", ".join([str(expr) for expr in self.atoms])} ]"
 
         return rep
+    
+class HashmapValue:
+    def __init__(self, values):
+        self.values = values
+
+    def valueAt(self, interpreter, key):
+        return self.values[interpreter.eval_expression(key)]
+    
+    def replaceAt(self, key, value):
+        self.values[key] = value
+
+    def __repr__(self):
+        rep = "{ " + f"{", ".join([f"{key} : {value}" for key, value in self.values.items()])}" + " }"
+
+        return rep
 
 class Interpreter:
     def __init__(self):
@@ -254,10 +269,18 @@ class Interpreter:
         if (isinstance(expr, nodes.ListExpression)):
             return ListValue([self.eval_expression(e) for e in expr.atoms])
         
+        if (isinstance(expr, nodes.HashmapExpression)):
+            return HashmapValue({self.eval_expression(key) : self.eval_expression(value) for key, value in expr.values.items()})
+        
         if (isinstance(expr, nodes.PostfixExpression)):
-            return self.eval_expression(expr.exp).operate(self, expr.start_exp, expr.end_exp)
+            eval_expr = self.eval_expression(expr.exp)
 
-        if (isinstance(expr, (FunctionValue, ListValue))):
+            if (isinstance(eval_expr, ListValue)):
+                return eval_expr.operate(self, expr.start_exp, expr.end_exp)
+            elif (isinstance(eval_expr, HashmapValue)):
+                return eval_expr.valueAt(self, expr.start_exp)
+
+        if (isinstance(expr, (FunctionValue, ListValue, HashmapValue))):
             return expr
 
         raise TypeError(f"Unknown expression type: {expr}")
@@ -337,6 +360,13 @@ def main():
     # '''
 
     sample = '''
+        ~ This is a example of comment ~
+        ~
+            You can use it as one line comment or multiline,
+            like this.
+        ~
+        # Or you can use hashtag as one line comment
+        
         prc x() {
             prc z() {
                 return [[1, 2, 3, 100, 99, 98], [44, 33, 12]]
@@ -352,12 +382,22 @@ def main():
         var p = [1, 2, 3, 4]
         var g = x()()
 
-        show(x()()[0:3][1][0:2][0])
+        ~ show(x()()[0:3][1][0:2][0]) ~
         show(g[0])
 
         set g[0][1] = [9, 0, 7]
 
         show(g)
+        # push(g[0][1], 22)
+        # show(g)
+
+        var ttt = { 123 : 123, "uuu" : 999 }
+
+        show(ttt[123])
+
+        set ttt[123] = 5000
+
+        show(ttt)
         push(g[0][1], 22)
         show(g)
 
