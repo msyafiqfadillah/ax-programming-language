@@ -30,7 +30,10 @@ false
 ```
 # Oneline Comment
 
-~ Multiline Comment ~
+~ 
+    Multiline 
+    Comment 
+~
 ```
 
 ## Variable Declaration & Assignment
@@ -43,6 +46,11 @@ show(name)
 set name = "Marcus Aurelius"
 
 show(name)
+
+var ints = 10
+set ints += 80
+
+show(ints)
 ```
 
 ## Function
