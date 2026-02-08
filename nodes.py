@@ -118,3 +118,12 @@ class PostfixExpression:
 
     def __repr__(self):
         return f"{self.exp}[{self.start_exp}{f":{self.end_exp}" if self.end_exp is not None else ""}]"
+    
+class IfStatement:
+    def __init__(self, condition, body, alternate):
+        self.condition = condition
+        self.body = body
+        self.alternate = alternate
+
+    def __repr__(self):
+        return "IF TEST"

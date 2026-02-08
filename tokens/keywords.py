@@ -6,7 +6,7 @@ class Keywords:
     RETURN = "return"
     IF = "if"
     MAYBE = "maybe"
-    ELSE = "else"
+    WHATEVER = "whatever"
     TRUE = "true"
     FALSE = "false"
     EMPTY = "empty"
@@ -22,7 +22,7 @@ class Keywords:
             cls.RETURN,
             cls.IF,
             cls.MAYBE,
-            cls.ELSE,
+            cls.WHATEVER,
             cls.TRUE,
             cls.FALSE,
             cls.EMPTY,

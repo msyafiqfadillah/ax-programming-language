@@ -149,6 +149,16 @@ class Interpreter:
                 raise ReturnException()
             else:
                 raise RuntimeError("Cannot use return outside block")
+        elif (isinstance(stmt, nodes.IfStatement)):
+            if ((stmt.condition is None) or (helper.is_truhty(self.eval_expression(stmt.condition)))):
+                local_env = Environment({}, self.env)
+
+                self.eval_block(stmt.body, local_env)
+            else:
+                if (isinstance(stmt.alternate, nodes.IfStatement)):
+                    self.eval_statement(stmt.alternate)
+            
+            return
 
         # expression statements
         return self.eval_expression(stmt)
@@ -350,6 +360,16 @@ def main():
         show(g)
         push(g[0][1], 22)
         show(g)
+
+        if (1 > 0) {
+            show(true)
+        } maybe (false) {
+            show(123)
+        } maybe (false) {
+            show(222)
+        } whatever {
+            show(999)
+        }
     '''
 
     interp = Interpreter()

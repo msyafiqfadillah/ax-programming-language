@@ -45,6 +45,8 @@ class Parser:
             return self.parse_function()
         elif (current_token["value"] == Keywords.RETURN):
             return self.parse_return()
+        elif (current_token["value"] == Keywords.IF):
+            return self.parse_if()
         # elif (current_token["type"] == "IDENTIFIER" or current_token["type"] == "NUMBER"):
         else:
             return self.parse_expression()
@@ -73,19 +75,54 @@ class Parser:
         self.match(Punctuations.PARANTHESSES_O, "value")
         params = self.parse_params()
         self.match(Punctuations.PARANTHESSES_C, "value")
-        self.match(Punctuations.CURVED_O, "value")
         body = self.parse_block()
-        self.match(Punctuations.CURVED_C, "value")
 
         return nodes.FunctionDeclaration(nodes.Identifier(identifier["value"]), params, body)
     
+    def parse_if(self):
+        self.match(Keywords.IF, "value")
+        self.match(Punctuations.PARANTHESSES_O, "value")
+        condition = self.parse_expression()
+        self.match(Punctuations.PARANTHESSES_C, "value")
+        body = self.parse_block()
+        alternate = self.parse_alternate()
+
+        # parse maybe
+        # parse else
+
+        return nodes.IfStatement(condition, body, alternate)
+    
+    def parse_alternate(self):
+        if (not helper.is_eof(self.index, self.tokens)):
+            if (self.peek()["value"] == Keywords.MAYBE):
+                self.match(Keywords.MAYBE, "value")
+                self.match(Punctuations.PARANTHESSES_O, "value")
+                condition = self.parse_expression()
+                self.match(Punctuations.PARANTHESSES_C, "value")
+                body = self.parse_block()
+
+                alternate = self.parse_alternate()
+
+                return nodes.IfStatement(condition, body, alternate)
+            elif (self.peek()["value"] == Keywords.WHATEVER):
+                self.match(Keywords.WHATEVER, "value")
+                body = self.parse_block()
+
+                return nodes.IfStatement(None, body, None)
+            else:
+                return None
+    
     def parse_block(self):
+        self.match(Punctuations.CURVED_O, "value")
+        
         body = []
 
         while (self.peek()["value"] != Punctuations.CURVED_C):
             statement = self.parse_statement()
 
             body.append(statement)
+
+        self.match(Punctuations.CURVED_C, "value")
 
         return nodes.BlockStatement(body)
     
