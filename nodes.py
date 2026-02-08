@@ -96,11 +96,11 @@ class ReturnStatement:
         return f"return {self.argument}"
     
 class ListExpression:
-    def __init__(self, atoms):
-        self.atoms = atoms
+    def __init__(self, values):
+        self.values = values
 
     def __repr__(self):
-        return f"[ {", ".join(repr(s) for s in self.atoms)} ]"
+        return f"[ {", ".join(repr(s) for s in self.values)} ]"
     
 class HashmapExpression:
     def __init__(self, values):

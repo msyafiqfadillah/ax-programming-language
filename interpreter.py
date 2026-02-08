@@ -40,8 +40,8 @@ class BuiltinValue:
         return self.func(*evaluated_args)
     
 class ListValue:
-    def __init__(self, atoms):
-        self.atoms = atoms 
+    def __init__(self, values):
+        self.values = values
 
     def operate(self, interpreter, start, end=None):
         if (end is None):
@@ -50,19 +50,19 @@ class ListValue:
             return self.slice(interpreter, start, end)
 
     def indexAt(self, interpreter, index):
-        return self.atoms[interpreter.eval_expression(index)]
+        return self.values[interpreter.eval_expression(index)]
     
     def replaceAt(self, index, value):
-        self.atoms[index] = value
+        self.values[index] = value
     
     def slice(self, interpreter, start, end):
-        return ListValue(self.atoms[interpreter.eval_expression(start):interpreter.eval_expression(end)])
+        return ListValue(self.values[interpreter.eval_expression(start):interpreter.eval_expression(end)])
     
     def push(self, value):
-        self.atoms.append(value)
+        self.values.append(value)
 
     def __repr__(self):
-        rep = f"[ {", ".join([str(expr) for expr in self.atoms])} ]"
+        rep = f"[ {", ".join([str(expr) for expr in self.values])} ]"
 
         return rep
     
@@ -144,6 +144,24 @@ class Interpreter:
             id = stmt.declaration.id
             container, key = self.resolve_assignment(id)
             value = self.eval_expression(stmt.declaration.init)
+
+            if (container == "env"):
+                old_value = self.env.lookup(key)
+            else:
+                old_value = container.values[key]
+
+            if (stmt.operator["value"] == Operators.A_EQUAL):
+                value = old_value + value
+            elif (stmt.operator["value"] == Operators.M_EQUAL):
+                value = old_value * value
+            elif (stmt.operator["value"] == Operators.S_EQUAL):
+                value = old_value - value
+            elif (stmt.operator["value"] == Operators.D_EQUAL):
+                value = old_value / value
+            elif (stmt.operator["value"] == Operators.P_EQUAL):
+                value = old_value ** value
+            elif (stmt.operator["value"] == Operators.MO_EQUAL):
+                value = old_value % value
 
             if (container == "env"):
                 self.env.assign(key, value)
@@ -265,7 +283,7 @@ class Interpreter:
             return result
         
         if (isinstance(expr, nodes.ListExpression)):
-            return ListValue([self.eval_expression(e) for e in expr.atoms])
+            return ListValue([self.eval_expression(e) for e in expr.values])
         
         if (isinstance(expr, nodes.HashmapExpression)):
             return HashmapValue({self.eval_expression(key) : self.eval_expression(value) for key, value in expr.values.items()})
@@ -415,6 +433,22 @@ def main():
         } whatever {
             show("how?!")
         }
+
+        ~
+            testing assignment operator
+        ~
+
+        var mmx = 10
+        set mmx += 1
+        set mmx *= 100
+
+        var zzm = { "a": 90, "b": 77 }
+        set zzm["a"] += 10
+
+        var lst = [10, 11, 90, 91]
+        set lst[2] -= 81
+
+        show(lst)
     '''
 
     interp = Interpreter()
