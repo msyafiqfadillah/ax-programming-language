@@ -107,6 +107,23 @@ show(book["id"])
 show(book)
 ```
 
+## if-maybe-whatever 
+
+```
+var ten = 10
+var nine = 9
+
+if (ten >= nine) {
+    show("yes, it's bigger")
+} maybe (ten <= nine) {
+    show("no, it's not")
+} maybe (ten == nine) {
+    show("it's not equal")
+} whatever {
+    show("how that even possible?")
+}
+```
+
 ## TODO
 - [x] syntax
 - [x] lexer
