@@ -132,6 +132,32 @@ if (ten >= nine) {
 }
 ```
 
+## loop
+
+```
+var index = 0
+
+loop (index < 10) {
+    show(index)
+
+    index += 1
+}
+
+# list iteration
+
+var i = 0
+var lst = ["Apple", "Bitcoin", "China"]
+var len_lst = length(lst)
+
+loop (i < len_lst) {
+    show(lst[i])
+
+    i += 1
+}
+```
+```
+```
+
 ## TODO
 - [x] syntax
 - [x] lexer
@@ -144,7 +170,7 @@ if (ten >= nine) {
 - [x] closure
 - [x] list
 - [x] hashmap
-- [ ] loop
+- [x] loop
 - [x] if-else
 - [x] return statement
 - [ ] break statement
