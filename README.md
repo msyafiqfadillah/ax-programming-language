@@ -152,7 +152,7 @@ var len_lst = length(lst)
 loop (i < len_lst) {
     show(lst[i])
 
-    i += 1
+    set i += 1
 }
 ```
 
