@@ -30,7 +30,7 @@ class FunctionValue:
 
         return result
     
-class BuiltinMap:
+class BuiltinValue:
     def __init__(self, func):
         self.func = func 
 
@@ -285,9 +285,9 @@ class Interpreter:
 
 
 global_env = Environment({
-    "show": BuiltinMap(lambda *args : print(*args)),
-    "length": BuiltinMap(lambda arg : len(arg)),
-    "push": BuiltinMap(lambda list_value, *args : list(map(list_value.push, args)))
+    "show": BuiltinValue(lambda *args : print(*args)),
+    "length": BuiltinValue(lambda arg : len(arg)),
+    "push": BuiltinValue(lambda list_value, *args : list(map(list_value.push, args)))
 })
 
 
