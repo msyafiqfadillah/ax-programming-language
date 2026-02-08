@@ -131,28 +131,26 @@ class Interpreter:
 
     def eval_statement(self, stmt):
         if (isinstance(stmt, nodes.VariableDeclaration)):
+            name = stmt.declaration.id.name
+            value = self.eval_expression(stmt.declaration.init)
+
+            if ((name in self.env.record) or (self.env.parent is not None and name in self.env.parent.record)):
+                raise NameError(f"Variable '{name}' already declared")
+
+            self.env.define(name, value)
+            
+            return value
+        elif (isinstance(stmt, nodes.VariableAssignment)):
             id = stmt.declaration.id
+            container, key = self.resolve_assignment(id)
+            value = self.eval_expression(stmt.declaration.init)
 
-            if (stmt.kind == "var"):
-                name = id.name
-                value = self.eval_expression(stmt.declaration.init)
+            if (container == "env"):
+                self.env.assign(key, value)
+            else:
+                container.replaceAt(key, value)
 
-                if ((name in self.env.record) or (self.env.parent is not None and name in self.env.parent.record)):
-                    raise NameError(f"Variable '{name}' already declared")
-
-                self.env.define(name, value)
-                
-                return value
-            elif (stmt.kind == "set"):
-                container, key = self.resolve_assignment(id)
-                value = self.eval_expression(stmt.declaration.init)
-
-                if (container == "env"):
-                    self.env.assign(key, value)
-                else:
-                    container.replaceAt(key, value)
-
-                return value
+            return value
         elif (isinstance(stmt, nodes.FunctionDeclaration)):
             name = stmt.name.name
             func = FunctionValue(stmt.params, stmt.body, self.env)

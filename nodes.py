@@ -6,12 +6,19 @@ class Program:
         return f"{self.body}"
 
 class VariableDeclaration:
-    def __init__(self, kind, declaration):
-        self.kind = kind
+    def __init__(self, declaration):
         self.declaration = declaration
 
     def __repr__(self):
-        return f"{self.kind} {self.declaration.id} = {self.declaration.init}"
+        return f"var {self.declaration.id} = {self.declaration.init}"
+
+class VariableAssignment:
+    def __init__(self, operator, declaration):
+        self.operator = operator
+        self.declaration = declaration
+
+    def __repr__(self):
+        return f"set {self.declaration.id} {self.operator} {self.declaration.init}"
 
 class VariableDeclarator:
     def __init__(self, id, init):
