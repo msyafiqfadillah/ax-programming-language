@@ -57,6 +57,8 @@ class Parser:
             return self.parse_return()
         elif (current_token["value"] == Keywords.IF):
             return self.parse_if()
+        elif (current_token["value"] == Keywords.LOOP):
+            return self.parse_loop()
         # elif (current_token["type"] == "IDENTIFIER" or current_token["type"] == "NUMBER"):
         else:
             return self.parse_expression()
@@ -97,9 +99,6 @@ class Parser:
         body = self.parse_block()
         alternate = self.parse_alternate()
 
-        # parse maybe
-        # parse else
-
         return nodes.IfStatement(condition, body, alternate)
     
     def parse_alternate(self):
@@ -121,6 +120,15 @@ class Parser:
                 return nodes.IfStatement(None, body, None)
             else:
                 return None
+
+    def parse_loop(self):
+        self.match(Keywords.LOOP, "value")
+        self.match(Punctuations.PARANTHESSES_O, "value")
+        condition = self.parse_expression()
+        self.match(Punctuations.PARANTHESSES_C, "value")
+        body = self.parse_block()
+
+        return nodes.LoopStatement(condition, body)
     
     def parse_block(self):
         self.match(Punctuations.CURVED_O, "value")

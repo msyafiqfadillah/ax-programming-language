@@ -98,11 +98,8 @@ class Interpreter:
         if (isinstance(node, nodes.Identifier)):
             name = node.name
 
-            if (not self.env.resolve(name)):
-                raise NameError(f"Variable {name} is not defined")
-
-            return ("env", name)
-        
+            if (self.env.resolve(name)):
+                return ("env", name)
         if (isinstance(node, nodes.PostfixExpression)):
             container, key = self.resolve_assignment(node.exp)
 
@@ -190,6 +187,13 @@ class Interpreter:
                     self.eval_statement(stmt.alternate)
             
             return
+        elif (isinstance(stmt, nodes.LoopStatement)):
+            local_env = Environment({}, self.env)
+
+            while (helper.is_truhty(self.eval_expression(stmt.condition))):
+                self.eval_block(stmt.body, local_env)
+
+            return
 
         # expression statements
         return self.eval_expression(stmt)
@@ -211,14 +215,12 @@ class Interpreter:
                     return v
 
             return v
-
+        
         if (isinstance(expr, nodes.Identifier)):
-            name = expr.name
+            _, key = self.resolve_assignment(expr)
+            value = self.env.lookup(key)
 
-            if ((name in self.env.record) or (self.env.parent is not None and name in self.env.parent.record)):
-                return self.eval_expression(self.env.lookup(name))
-            
-            raise NameError(f"Variable '{name}' is not defined")
+            return self.eval_expression(value)
 
         if (isinstance(expr, nodes.GroupedExpression)):
             return self.eval_expression(expr.expr)
@@ -304,7 +306,7 @@ class Interpreter:
 
 global_env = Environment({
     "show": BuiltinValue(lambda *args : print(*args)),
-    "length": BuiltinValue(lambda arg : len(arg)),
+    "length": BuiltinValue(lambda arg : len(arg.values)),
     "push": BuiltinValue(lambda list_value, *args : list(map(list_value.push, args)))
 })
 
@@ -384,6 +386,29 @@ def main():
         set lst[2] -= 81
 
         show(lst)
+
+        ~
+            testing loop statement 
+        ~
+
+        var mgmt = [1, 9, 90, 190, 1990]
+        var l_mgmt = length(mgmt)
+        var index = 0
+        var xxx = 0
+
+        loop (index < l_mgmt) {
+            show(mgmt[index])
+            
+            set xxx = 0
+
+            loop (xxx < 3) {
+                set xxx += 1
+                
+                show(xxx)
+            }
+
+            set index += 1
+        }
     '''
 
     interp = Interpreter()

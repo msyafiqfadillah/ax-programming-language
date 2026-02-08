@@ -134,3 +134,11 @@ class IfStatement:
 
     def __repr__(self):
         return "IF TEST"
+
+class LoopStatement:
+    def __init__(self, condition, body):
+        self.condition = condition
+        self.body = body
+
+    def __repr__(self):
+        return "LOOP TEST"
