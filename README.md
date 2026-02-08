@@ -155,8 +155,6 @@ loop (i < len_lst) {
     i += 1
 }
 ```
-```
-```
 
 ## TODO
 - [x] syntax
