@@ -140,7 +140,7 @@ var index = 0
 loop (index < 10) {
     show(index)
 
-    index += 1
+    set index += 1
 }
 
 # list iteration
