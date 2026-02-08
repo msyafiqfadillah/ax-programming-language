@@ -15,7 +15,7 @@ this is my first attempt of creating a language.
 - [x] list
 - [ ] hashmap
 - [ ] loop
-- [ ] if-else
+- [x] if-else
 - [x] return statement
 - [ ] break statement
 - [ ] continue statement
