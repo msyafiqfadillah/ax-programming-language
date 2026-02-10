@@ -52,7 +52,7 @@ class Parser:
         elif (current_token["value"] == Keywords.SET):
             return self.parse_set()
         elif (current_token["value"] == Keywords.PRC):
-            return self.parse_function()
+            return self.parse_prc()
         elif (current_token["value"] == Keywords.RETURN):
             return self.parse_return()
         elif (current_token["value"] == Keywords.IF):
@@ -85,7 +85,7 @@ class Parser:
 
         return nodes.VariableAssignment(operator=operator, declaration=nodes.VariableDeclarator(id=postfix, init=expression))
 
-    def parse_function(self):
+    def parse_prc(self):
         self.match(Keywords.PRC, "value")
         identifier = self.match("IDENTIFIER", "type")
         self.match(Punctuations.PARANTHESSES_O, "value")
@@ -343,8 +343,19 @@ class Parser:
             return self.parse_list()
         elif (current["value"] == Punctuations.CURVED_O):
             return self.parse_hashmap()
+        elif (current["value"] == Keywords.PRC):
+            return self.parse_prc_expr()
 
         raise TypeError(f"Expected atom, but got {current["value"]}")
+
+    def parse_prc_expr(self):
+        self.match(Keywords.PRC, "value")
+        self.match(Punctuations.PARANTHESSES_O, "value")
+        params = self.parse_params()
+        self.match(Punctuations.PARANTHESSES_C, "value")
+        body = self.parse_block()
+
+        return nodes.FunctionExpression(params, body)
 
     def parse_list(self):
         expr_lst = []

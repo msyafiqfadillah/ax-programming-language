@@ -313,6 +313,11 @@ class Interpreter:
 
             return result
         
+        if (isinstance(expr, nodes.FunctionExpression)):
+            func = FunctionValue(expr.params, expr.body, self.env)
+
+            return func
+
         if (isinstance(expr, nodes.ListExpression)):
             return ListValue([self.eval_expression(e) for e in expr.values])
         
@@ -458,6 +463,15 @@ def main():
 
             set oo += 1
         }
+
+        ~
+            testing lambda function
+        ~
+        var ggh = prc () { 
+            show("testing", oo) 
+        }
+
+        ggh()
     '''
 
     interp = Interpreter()

@@ -156,3 +156,13 @@ class BreakStatement:
 
     def __repr__(self):
         return "break"
+
+class FunctionExpression:
+    def __init__(self, params, body):
+        self.params = params
+        self.body = body
+
+    def __repr__(self):
+        params = ", ".join(repr(s) for s in self.params)
+
+        return f"prc ({params}) {self.body}"
