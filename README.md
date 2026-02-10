@@ -202,4 +202,4 @@ loop (c_index < 10) {
 - [x] comment
     - [x] oneline comment
     - [x] multiline comment
-- [ ] anonymous/lambda function
+- [x] anonymous/lambda function
