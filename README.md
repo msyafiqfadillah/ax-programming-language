@@ -155,7 +155,7 @@ loop (i < len_lst) {
     set i += 1
 }
 
-# continue 
+# continue & break
 
 var c_index = 0
 
@@ -164,6 +164,8 @@ loop (c_index < 10) {
 
     if (c_index % 2 != 2) {
       continue
+    } maybe (c_index == 8) {
+      break
     }
 
     set c_index += 1
@@ -185,7 +187,7 @@ loop (c_index < 10) {
 - [x] loop
 - [x] if-else
 - [x] return statement
-- [ ] break statement
+- [x] break statement
 - [x] continue statement
 - [x] boolean
 - [x] list operations 

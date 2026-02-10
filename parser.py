@@ -61,6 +61,8 @@ class Parser:
             return self.parse_loop()
         elif (current_token["value"] == Keywords.CONTINUE):
             return self.parse_continue()
+        elif (current_token["value"] == Keywords.BREAK):
+            return self.parse_break()
         # elif (current_token["type"] == "IDENTIFIER" or current_token["type"] == "NUMBER"):
         else:
             return self.parse_expression()
@@ -426,6 +428,11 @@ class Parser:
         self.match(Keywords.CONTINUE, "value")
 
         return nodes.ContinueStatement()
+    
+    def parse_break(self):
+        self.match(Keywords.BREAK, "value")
+
+        return nodes.BreakStatement()
 
 def main():
     parser = Parser()

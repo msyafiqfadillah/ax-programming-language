@@ -15,6 +15,10 @@ class ContinueException(Exception):
     def __init__(self):
         pass
 
+class BreakException(Exception):
+    def __init__(self):
+        pass
+
 class FunctionValue:
     def __init__(self, params, body, parent_env):
         self.params = params 
@@ -120,11 +124,11 @@ class Interpreter:
     def eval_block(self, stmts, local_env):
         parent_env = self.env
         self.env = local_env
-
+ 
         try:
             for stmt in stmts.body:
                 self.eval_statement(stmt)
-            
+                
             return None
         except ReturnException:
             return self.eval_expression(stmt.argument)
@@ -199,10 +203,12 @@ class Interpreter:
 
             try:
                 while (helper.is_truhty(self.eval_expression(stmt.condition))):
-                    try: 
+                    try:
                         self.eval_block(stmt.body, local_env)
                     except ContinueException:
                         continue
+                    except BreakException:
+                        break
             finally:
                 self.loop_depth -= 1
 
@@ -212,6 +218,11 @@ class Interpreter:
                 raise RuntimeError("Cannot use continue outside loop statement")
 
             raise ContinueException()
+        elif (isinstance(stmt, nodes.BreakStatement)):
+            if (self.loop_depth == 0):
+                raise RuntimeError("Cannot use break outisde loop statement")
+
+            raise BreakException()
 
         # expression statements
         return self.eval_expression(stmt)
@@ -408,7 +419,7 @@ def main():
         ~
             testing loop statement 
         ~
-
+        ~
         var mgmt = [1, 9, 90, 190, 1990]
         var l_mgmt = length(mgmt)
         var index = 0
@@ -420,16 +431,32 @@ def main():
             set xxx = 0
 
             loop (xxx < 3) {
-                set xxx += 1
-                
-                if (xxx % 2 != 0) {
+                if (xxx % 2 == 0) {
                     continue
                 }
-
+                
                 show(xxx)
+
+                set xxx += 1
             }
 
             set index += 1
+        }
+        ~
+        var oo = 0 
+
+        loop (oo < 5) {
+            if (oo == 3) {
+                set oo += 1
+
+                continue
+            } maybe (oo == 4) {
+                break
+            }
+
+            show(oo)
+
+            set oo += 1
         }
     '''
 

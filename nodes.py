@@ -149,3 +149,10 @@ class ContinueStatement:
 
     def __repr__(self):
         return "continue"
+
+class BreakStatement:
+    def __init__(self):
+        pass
+
+    def __repr__(self):
+        return "break"
