@@ -11,6 +11,7 @@ class Keywords:
     FALSE = "false"
     EMPTY = "empty"
     UNDEFINED = "undefined"
+    CONTINUE = "continue"
 
     @classmethod
     def all(cls):
@@ -26,5 +27,6 @@ class Keywords:
             cls.TRUE,
             cls.FALSE,
             cls.EMPTY,
-            cls.UNDEFINED
+            cls.UNDEFINED,
+            cls.CONTINUE
         }

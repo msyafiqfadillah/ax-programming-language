@@ -154,6 +154,20 @@ loop (i < len_lst) {
 
     set i += 1
 }
+
+# continue 
+
+var c_index = 0
+
+loop (c_index < 10) {
+    show(c_index)
+
+    if (c_index % 2 != 2) {
+      continue
+    }
+
+    set c_index += 1
+}
 ```
 
 ## TODO
@@ -172,7 +186,7 @@ loop (i < len_lst) {
 - [x] if-else
 - [x] return statement
 - [ ] break statement
-- [ ] continue statement
+- [x] continue statement
 - [x] boolean
 - [x] list operations 
     - [x] indexing

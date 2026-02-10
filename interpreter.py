@@ -11,6 +11,10 @@ class ReturnException(Exception):
     def __init__(self):
         pass
 
+class ContinueException(Exception):
+    def __init__(self):
+        pass
+
 class FunctionValue:
     def __init__(self, params, body, parent_env):
         self.params = params 
@@ -84,6 +88,7 @@ class HashmapValue:
 class Interpreter:
     def __init__(self):
         self.env = global_env
+        self.loop_depth = 0
 
     def run(self, source):
         tokens = Scanner().scans(source)
@@ -188,12 +193,25 @@ class Interpreter:
             
             return
         elif (isinstance(stmt, nodes.LoopStatement)):
+            self.loop_depth += 1
+
             local_env = Environment({}, self.env)
 
-            while (helper.is_truhty(self.eval_expression(stmt.condition))):
-                self.eval_block(stmt.body, local_env)
+            try:
+                while (helper.is_truhty(self.eval_expression(stmt.condition))):
+                    try: 
+                        self.eval_block(stmt.body, local_env)
+                    except ContinueException:
+                        continue
+            finally:
+                self.loop_depth -= 1
 
             return
+        elif (isinstance(stmt, nodes.ContinueStatement)):
+            if (self.loop_depth == 0):
+                raise RuntimeError("Cannot use continue outside loop statement")
+
+            raise ContinueException()
 
         # expression statements
         return self.eval_expression(stmt)
@@ -404,6 +422,10 @@ def main():
             loop (xxx < 3) {
                 set xxx += 1
                 
+                if (xxx % 2 != 0) {
+                    continue
+                }
+
                 show(xxx)
             }
 

@@ -59,6 +59,8 @@ class Parser:
             return self.parse_if()
         elif (current_token["value"] == Keywords.LOOP):
             return self.parse_loop()
+        elif (current_token["value"] == Keywords.CONTINUE):
+            return self.parse_continue()
         # elif (current_token["type"] == "IDENTIFIER" or current_token["type"] == "NUMBER"):
         else:
             return self.parse_expression()
@@ -419,6 +421,11 @@ class Parser:
         self.match(Keywords.UNDEFINED, "value")
 
         return nodes.Literal(Keywords.UNDEFINED)
+
+    def parse_continue(self):
+        self.match(Keywords.CONTINUE, "value")
+
+        return nodes.ContinueStatement()
 
 def main():
     parser = Parser()

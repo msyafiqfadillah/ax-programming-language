@@ -142,3 +142,10 @@ class LoopStatement:
 
     def __repr__(self):
         return "LOOP TEST"
+
+class ContinueStatement:
+    def __init__(self):
+        pass
+
+    def __repr__(self):
+        return "continue"
