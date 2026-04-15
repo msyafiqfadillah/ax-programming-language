@@ -122,11 +122,11 @@ var ten = 10
 var nine = 9
 
 if (ten >= nine) {
-    show("yes, it's bigger")
+    show("it's bigger")
 } maybe (ten <= nine) {
-    show("no, it's not")
+    show("it's smaller")
 } maybe (ten == nine) {
-    show("it's not equal")
+    show("it's equal")
 } whatever {
     show("how that even possible?")
 }
