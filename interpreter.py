@@ -164,6 +164,43 @@ class Interpreter:
                 raise ReturnException()
             else:
                 raise RuntimeError("Cannot use return outside block")
+        elif (isinstance(stmt, nodes.IfStatement)):
+            if ((stmt.condition is None) or (helper.is_truhty(self.eval_expression(stmt.condition)))):
+                local_env = Environment({}, self.env)
+
+                self.eval_block(stmt.body, local_env)
+            else:
+                if (isinstance(stmt.alternate, nodes.IfStatement)):
+                    self.eval_statement(stmt.alternate)
+            
+            return
+        elif (isinstance(stmt, nodes.LoopStatement)):
+            self.loop_depth += 1
+
+            try:
+                while (helper.is_truhty(self.eval_expression(stmt.condition))):
+                    try:
+                        local_env = Environment({}, self.env)
+
+                        self.eval_block(stmt.body, local_env)
+                    except ContinueException:
+                        continue
+                    except BreakException:
+                        break
+            finally:
+                self.loop_depth -= 1
+
+            return
+        elif (isinstance(stmt, nodes.ContinueStatement)):
+            if (self.loop_depth == 0):
+                raise RuntimeError("Cannot use continue outside loop statement")
+
+            raise ContinueException()
+        elif (isinstance(stmt, nodes.BreakStatement)):
+            if (self.loop_depth == 0):
+                raise RuntimeError("Cannot use break outisde loop statement")
+
+            raise BreakException()
 
         # expression statements
         return self.eval_expression(stmt)
