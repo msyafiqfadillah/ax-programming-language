@@ -20,6 +20,16 @@ class Parser:
         
         raise TypeError(f"Expected token {expected}, but got {c_token["value"]}")
 
+    def match_assignment(self):
+        c_token = self.peek()
+
+        if (c_token["value"] in (Operators.EQUAL, Operators.A_EQUAL, Operators.M_EQUAL, Operators.S_EQUAL, Operators.D_EQUAL, Operators.P_EQUAL, Operators.MO_EQUAL)):
+            self.index += 1
+
+            return c_token
+        else:
+            raise TypeError(f"Expected token assignment, but got {c_token["value"]}")
+
     def peek(self):        
         return self.tokens[self.index]
 
@@ -42,9 +52,17 @@ class Parser:
         elif (current_token["value"] == Keywords.SET):
             return self.parse_set()
         elif (current_token["value"] == Keywords.PRC):
-            return self.parse_function()
+            return self.parse_prc()
         elif (current_token["value"] == Keywords.RETURN):
             return self.parse_return()
+        elif (current_token["value"] == Keywords.IF):
+            return self.parse_if()
+        elif (current_token["value"] == Keywords.LOOP):
+            return self.parse_loop()
+        elif (current_token["value"] == Keywords.CONTINUE):
+            return self.parse_continue()
+        elif (current_token["value"] == Keywords.BREAK):
+            return self.parse_break()
         # elif (current_token["type"] == "IDENTIFIER" or current_token["type"] == "NUMBER"):
         else:
             return self.parse_expression()
@@ -57,35 +75,76 @@ class Parser:
         self.match(Operators.EQUAL, "value")
         expression = self.parse_expression()
 
-        return nodes.VariableDeclaration(kind="var", declaration=nodes.VariableDeclarator(id=nodes.Identifier(name=identifier["value"]), init=expression))
+        return nodes.VariableDeclaration(declaration=nodes.VariableDeclarator(id=nodes.Identifier(name=identifier["value"]), init=expression))
     
     def parse_set(self):
         self.match(Keywords.SET, "value")
         postfix = self.parse_postfix()
-        self.match(Operators.EQUAL, "value")
+        operator = self.match_assignment()
         expression = self.parse_expression()
 
-        return nodes.VariableDeclaration(kind="set", declaration=nodes.VariableDeclarator(id=postfix, init=expression))
+        return nodes.VariableAssignment(operator=operator, declaration=nodes.VariableDeclarator(id=postfix, init=expression))
 
-    def parse_function(self):
+    def parse_prc(self):
         self.match(Keywords.PRC, "value")
         identifier = self.match("IDENTIFIER", "type")
         self.match(Punctuations.PARANTHESSES_O, "value")
         params = self.parse_params()
         self.match(Punctuations.PARANTHESSES_C, "value")
-        self.match(Punctuations.CURVED_O, "value")
         body = self.parse_block()
-        self.match(Punctuations.CURVED_C, "value")
 
         return nodes.FunctionDeclaration(nodes.Identifier(identifier["value"]), params, body)
     
+    def parse_if(self):
+        self.match(Keywords.IF, "value")
+        self.match(Punctuations.PARANTHESSES_O, "value")
+        condition = self.parse_expression()
+        self.match(Punctuations.PARANTHESSES_C, "value")
+        body = self.parse_block()
+        alternate = self.parse_alternate()
+
+        return nodes.IfStatement(condition, body, alternate)
+    
+    def parse_alternate(self):
+        if (not helper.is_eof(self.index, self.tokens)):
+            if (self.peek()["value"] == Keywords.MAYBE):
+                self.match(Keywords.MAYBE, "value")
+                self.match(Punctuations.PARANTHESSES_O, "value")
+                condition = self.parse_expression()
+                self.match(Punctuations.PARANTHESSES_C, "value")
+                body = self.parse_block()
+
+                alternate = self.parse_alternate()
+
+                return nodes.IfStatement(condition, body, alternate)
+            elif (self.peek()["value"] == Keywords.WHATEVER):
+                self.match(Keywords.WHATEVER, "value")
+                body = self.parse_block()
+
+                return nodes.IfStatement(None, body, None)
+            else:
+                return None
+
+    def parse_loop(self):
+        self.match(Keywords.LOOP, "value")
+        self.match(Punctuations.PARANTHESSES_O, "value")
+        condition = self.parse_expression()
+        self.match(Punctuations.PARANTHESSES_C, "value")
+        body = self.parse_block()
+
+        return nodes.LoopStatement(condition, body)
+    
     def parse_block(self):
+        self.match(Punctuations.CURVED_O, "value")
+        
         body = []
 
         while (self.peek()["value"] != Punctuations.CURVED_C):
             statement = self.parse_statement()
 
             body.append(statement)
+
+        self.match(Punctuations.CURVED_C, "value")
 
         return nodes.BlockStatement(body)
     
@@ -284,8 +343,19 @@ class Parser:
             return self.parse_list()
         elif (current["value"] == Punctuations.CURVED_O):
             return self.parse_hashmap()
+        elif (current["value"] == Keywords.PRC):
+            return self.parse_prc_expr()
 
         raise TypeError(f"Expected atom, but got {current["value"]}")
+
+    def parse_prc_expr(self):
+        self.match(Keywords.PRC, "value")
+        self.match(Punctuations.PARANTHESSES_O, "value")
+        params = self.parse_params()
+        self.match(Punctuations.PARANTHESSES_C, "value")
+        body = self.parse_block()
+
+        return nodes.FunctionExpression(params, body)
 
     def parse_list(self):
         expr_lst = []
@@ -364,6 +434,16 @@ class Parser:
         self.match(Keywords.UNDEFINED, "value")
 
         return nodes.Literal(Keywords.UNDEFINED)
+
+    def parse_continue(self):
+        self.match(Keywords.CONTINUE, "value")
+
+        return nodes.ContinueStatement()
+    
+    def parse_break(self):
+        self.match(Keywords.BREAK, "value")
+
+        return nodes.BreakStatement()
 
 def main():
     parser = Parser()

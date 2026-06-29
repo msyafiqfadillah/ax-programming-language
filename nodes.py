@@ -6,12 +6,19 @@ class Program:
         return f"{self.body}"
 
 class VariableDeclaration:
-    def __init__(self, kind, declaration):
-        self.kind = kind
+    def __init__(self, declaration):
         self.declaration = declaration
 
     def __repr__(self):
-        return f"{self.kind} {self.declaration.id} = {self.declaration.init}"
+        return f"var {self.declaration.id} = {self.declaration.init}"
+
+class VariableAssignment:
+    def __init__(self, operator, declaration):
+        self.operator = operator
+        self.declaration = declaration
+
+    def __repr__(self):
+        return f"set {self.declaration.id} {self.operator} {self.declaration.init}"
 
 class VariableDeclarator:
     def __init__(self, id, init):
@@ -89,11 +96,11 @@ class ReturnStatement:
         return f"return {self.argument}"
     
 class ListExpression:
-    def __init__(self, atoms):
-        self.atoms = atoms
+    def __init__(self, values):
+        self.values = values
 
     def __repr__(self):
-        return f"[ {", ".join(repr(s) for s in self.atoms)} ]"
+        return f"[ {", ".join(repr(s) for s in self.values)} ]"
     
 class HashmapExpression:
     def __init__(self, values):
@@ -118,3 +125,44 @@ class PostfixExpression:
 
     def __repr__(self):
         return f"{self.exp}[{self.start_exp}{f":{self.end_exp}" if self.end_exp is not None else ""}]"
+    
+class IfStatement:
+    def __init__(self, condition, body, alternate):
+        self.condition = condition
+        self.body = body
+        self.alternate = alternate
+
+    def __repr__(self):
+        return "IF TEST"
+
+class LoopStatement:
+    def __init__(self, condition, body):
+        self.condition = condition
+        self.body = body
+
+    def __repr__(self):
+        return "LOOP TEST"
+
+class ContinueStatement:
+    def __init__(self):
+        pass
+
+    def __repr__(self):
+        return "continue"
+
+class BreakStatement:
+    def __init__(self):
+        pass
+
+    def __repr__(self):
+        return "break"
+
+class FunctionExpression:
+    def __init__(self, params, body):
+        self.params = params
+        self.body = body
+
+    def __repr__(self):
+        params = ", ".join(repr(s) for s in self.params)
+
+        return f"prc ({params}) {self.body}"

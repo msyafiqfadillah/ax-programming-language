@@ -30,7 +30,10 @@ false
 ```
 # Oneline Comment
 
-~ Multiline Comment ~
+~ 
+    Multiline 
+    Comment 
+~
 ```
 
 ## Variable Declaration & Assignment
@@ -43,6 +46,11 @@ show(name)
 set name = "Marcus Aurelius"
 
 show(name)
+
+var ints = 10
+set ints += 80
+
+show(ints)
 ```
 
 ## Function
@@ -107,6 +115,63 @@ show(book["id"])
 show(book)
 ```
 
+## if-maybe-whatever 
+
+```
+var ten = 10
+var nine = 9
+
+if (ten >= nine) {
+    show("it's bigger")
+} maybe (ten <= nine) {
+    show("it's smaller")
+} maybe (ten == nine) {
+    show("it's equal")
+} whatever {
+    show("how that even possible?")
+}
+```
+
+## loop
+
+```
+var index = 0
+
+loop (index < 10) {
+    show(index)
+
+    set index += 1
+}
+
+# list iteration
+
+var i = 0
+var lst = ["Apple", "Bitcoin", "China"]
+var len_lst = length(lst)
+
+loop (i < len_lst) {
+    show(lst[i])
+
+    set i += 1
+}
+
+# continue & break
+
+var c_index = 0
+
+loop (c_index < 10) {
+    show(c_index)
+
+    if (c_index % 2 != 2) {
+      continue
+    } maybe (c_index == 8) {
+      break
+    }
+
+    set c_index += 1
+}
+```
+
 ## TODO
 - [x] syntax
 - [x] lexer
@@ -119,11 +184,11 @@ show(book)
 - [x] closure
 - [x] list
 - [x] hashmap
-- [ ] loop
-- [ ] if-else
+- [x] loop
+- [x] if-else
 - [x] return statement
-- [ ] break statement
-- [ ] continue statement
+- [x] break statement
+- [x] continue statement
 - [x] boolean
 - [x] list operations 
     - [x] indexing
@@ -137,3 +202,4 @@ show(book)
 - [x] comment
     - [x] oneline comment
     - [x] multiline comment
+- [x] anonymous function

@@ -11,6 +11,14 @@ class ReturnException(Exception):
     def __init__(self):
         pass
 
+class ContinueException(Exception):
+    def __init__(self):
+        pass
+
+class BreakException(Exception):
+    def __init__(self):
+        pass
+
 class FunctionValue:
     def __init__(self, params, body, parent_env):
         self.params = params 
@@ -30,7 +38,7 @@ class FunctionValue:
 
         return result
     
-class BuiltinMap:
+class BuiltinValue:
     def __init__(self, func):
         self.func = func 
 
@@ -40,8 +48,8 @@ class BuiltinMap:
         return self.func(*evaluated_args)
     
 class ListValue:
-    def __init__(self, atoms):
-        self.atoms = atoms 
+    def __init__(self, values):
+        self.values = values
 
     def operate(self, interpreter, start, end=None):
         if (end is None):
@@ -50,19 +58,19 @@ class ListValue:
             return self.slice(interpreter, start, end)
 
     def indexAt(self, interpreter, index):
-        return self.atoms[interpreter.eval_expression(index)]
+        return self.values[interpreter.eval_expression(index)]
     
     def replaceAt(self, index, value):
-        self.atoms[index] = value
+        self.values[index] = value
     
     def slice(self, interpreter, start, end):
-        return ListValue(self.atoms[interpreter.eval_expression(start):interpreter.eval_expression(end)])
+        return ListValue(self.values[interpreter.eval_expression(start):interpreter.eval_expression(end)])
     
     def push(self, value):
-        self.atoms.append(value)
+        self.values.append(value)
 
     def __repr__(self):
-        rep = f"[ {", ".join([str(expr) for expr in self.atoms])} ]"
+        rep = f"[ {", ".join([str(expr) for expr in self.values])} ]"
 
         return rep
     
@@ -84,6 +92,7 @@ class HashmapValue:
 class Interpreter:
     def __init__(self):
         self.env = global_env
+        self.loop_depth = 0
 
     def run(self, source):
         tokens = Scanner().scans(source)
@@ -98,11 +107,8 @@ class Interpreter:
         if (isinstance(node, nodes.Identifier)):
             name = node.name
 
-            if (not self.env.resolve(name)):
-                raise NameError(f"Variable {name} is not defined")
-
-            return ("env", name)
-        
+            if (self.env.resolve(name)):
+                return ("env", name)
         if (isinstance(node, nodes.PostfixExpression)):
             container, key = self.resolve_assignment(node.exp)
 
@@ -118,11 +124,11 @@ class Interpreter:
     def eval_block(self, stmts, local_env):
         parent_env = self.env
         self.env = local_env
-
+ 
         try:
             for stmt in stmts.body:
                 self.eval_statement(stmt)
-            
+                
             return None
         except ReturnException:
             return self.eval_expression(stmt.argument)
@@ -131,28 +137,44 @@ class Interpreter:
 
     def eval_statement(self, stmt):
         if (isinstance(stmt, nodes.VariableDeclaration)):
+            name = stmt.declaration.id.name
+            value = self.eval_expression(stmt.declaration.init)
+
+            if ((name in self.env.record) or (self.env.parent is not None and name in self.env.parent.record)):
+                raise NameError(f"Variable '{name}' already declared")
+
+            self.env.define(name, value)
+            
+            return value
+        elif (isinstance(stmt, nodes.VariableAssignment)):
             id = stmt.declaration.id
+            container, key = self.resolve_assignment(id)
+            value = self.eval_expression(stmt.declaration.init)
 
-            if (stmt.kind == "var"):
-                name = id.name
-                value = self.eval_expression(stmt.declaration.init)
+            if (container == "env"):
+                old_value = self.env.lookup(key)
+            else:
+                old_value = container.values[key]
 
-                if ((name in self.env.record) or (self.env.parent is not None and name in self.env.parent.record)):
-                    raise NameError(f"Variable '{name}' already declared")
+            if (stmt.operator["value"] == Operators.A_EQUAL):
+                value = old_value + value
+            elif (stmt.operator["value"] == Operators.M_EQUAL):
+                value = old_value * value
+            elif (stmt.operator["value"] == Operators.S_EQUAL):
+                value = old_value - value
+            elif (stmt.operator["value"] == Operators.D_EQUAL):
+                value = old_value / value
+            elif (stmt.operator["value"] == Operators.P_EQUAL):
+                value = old_value ** value
+            elif (stmt.operator["value"] == Operators.MO_EQUAL):
+                value = old_value % value
 
-                self.env.define(name, value)
-                
-                return value
-            elif (stmt.kind == "set"):
-                container, key = self.resolve_assignment(id)
-                value = self.eval_expression(stmt.declaration.init)
+            if (container == "env"):
+                self.env.assign(key, value)
+            else:
+                container.replaceAt(key, value)
 
-                if (container == "env"):
-                    self.env.assign(key, value)
-                else:
-                    container.replaceAt(key, value)
-
-                return value
+            return value
         elif (isinstance(stmt, nodes.FunctionDeclaration)):
             name = stmt.name.name
             func = FunctionValue(stmt.params, stmt.body, self.env)
@@ -222,14 +244,12 @@ class Interpreter:
                     return v
 
             return v
-
+        
         if (isinstance(expr, nodes.Identifier)):
-            name = expr.name
+            _, key = self.resolve_assignment(expr)
+            value = self.env.lookup(key)
 
-            if ((name in self.env.record) or (self.env.parent is not None and name in self.env.parent.record)):
-                return self.eval_expression(self.env.lookup(name))
-            
-            raise NameError(f"Variable '{name}' is not defined")
+            return self.eval_expression(value)
 
         if (isinstance(expr, nodes.GroupedExpression)):
             return self.eval_expression(expr.expr)
@@ -293,8 +313,13 @@ class Interpreter:
 
             return result
         
+        if (isinstance(expr, nodes.FunctionExpression)):
+            func = FunctionValue(expr.params, expr.body, self.env)
+
+            return func
+
         if (isinstance(expr, nodes.ListExpression)):
-            return ListValue([self.eval_expression(e) for e in expr.atoms])
+            return ListValue([self.eval_expression(e) for e in expr.values])
         
         if (isinstance(expr, nodes.HashmapExpression)):
             return HashmapValue({self.eval_expression(key) : self.eval_expression(value) for key, value in expr.values.items()})
@@ -314,78 +339,13 @@ class Interpreter:
 
 
 global_env = Environment({
-    "show": BuiltinMap(lambda *args : print(*args)),
-    "length": BuiltinMap(lambda arg : len(arg)),
-    "push": BuiltinMap(lambda list_value, *args : list(map(list_value.push, args)))
+    "show": BuiltinValue(lambda *args : print(*args)),
+    "length": BuiltinValue(lambda arg : len(arg.values)),
+    "push": BuiltinValue(lambda list_value, *args : list(map(list_value.push, args)))
 })
 
 
 def main():
-    # sample = '''
-    #     prc test() {
-    #         var x = 10
-
-    #         prc inner_test(new_param) {
-    #             set x = x + new_param
-
-    #             return x
-    #         }
-
-    #         return inner_test
-    #     }
-
-    #     var a = test()
-
-    #     show(a(5))
-    #     show(a(5))
-    #     show(2 + 2)
-
-    #     prc test() {
-    #         var x = 10
-
-    #         prc inner_test(new_param) {
-    #             set x = x + new_param
-
-    #             return x
-    #         }
-
-    #         return inner_test
-    #     }
-
-    #     var q = test()
-
-    #     show(q(5))
-    #     show(q(5))
-
-    #     prc make_counter() {
-    #         var count = 0
-    #         prc inc() {
-    #             set count = count + 1
-    #             return count
-    #         }
-    #         return inc
-    #     }
-
-    #     var c1 = make_counter()
-    #     var c2 = make_counter()
-
-    #     show(c1())
-    #     show(c1())
-    #     show(c2())
-    #     show(c1())
-    # '''
-
-    # sample = '''
-    #     prc x() {
-    #         return 555
-    #     }
-
-    #     var z = 10
-    #     var m = [[1, 2, 3, x()], [777, 888]]
-
-    #     show(m[0][0])
-    # '''
-
     sample = '''
         ~ This is a example of comment ~
         ~
@@ -425,6 +385,93 @@ def main():
         set ttt[123] = 5000
 
         show(ttt)
+        push(g[0][1], 22)
+        show(g)
+
+        ~
+            example of if else in ax (written with neovim)
+        ~
+
+        var nine = 9
+        var eight = 8
+
+        if (nine >= eight) {
+            show("yes, it's bigger")
+        } maybe (nine <= eight) {
+            show("no, it's not bigger")
+        } maybe (nine == eight) {
+            show("also not equal")
+        } whatever {
+            show("how?!")
+        }
+
+        ~
+            testing assignment operator
+        ~
+
+        var mmx = 10
+        set mmx += 1
+        set mmx *= 100
+
+        var zzm = { "a": 90, "b": 77 }
+        set zzm["a"] += 10
+
+        var lst = [10, 11, 90, 91]
+        set lst[2] -= 81
+
+        show(lst)
+
+        ~
+            testing loop statement 
+        ~
+        ~
+        var mgmt = [1, 9, 90, 190, 1990]
+        var l_mgmt = length(mgmt)
+        var index = 0
+        var xxx = 0
+
+        loop (index < l_mgmt) {
+            show(mgmt[index])
+            
+            set xxx = 0
+
+            loop (xxx < 3) {
+                if (xxx % 2 == 0) {
+                    continue
+                }
+                
+                show(xxx)
+
+                set xxx += 1
+            }
+
+            set index += 1
+        }
+        ~
+        var oo = 0 
+
+        loop (oo < 5) {
+            if (oo == 3) {
+                set oo += 1
+
+                continue
+            } maybe (oo == 4) {
+                break
+            }
+
+            show(oo)
+
+            set oo += 1
+        }
+
+        ~
+            testing lambda function
+        ~
+        var ggh = prc () { 
+            show("testing", oo) 
+        }
+
+        ggh()
     '''
 
     interp = Interpreter()

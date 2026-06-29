@@ -31,7 +31,9 @@ atom            ::= literal
                     | "(" expression ")"
                     | list
                     | hashmap
+                    | prc_expr
 
+prc_expr        ::= "prc" "(" [ param_list ] ")" block
 list            ::= "|" [ expression { "," expression } ] "|"
 hashmap         ::= "{" [ expression ":" expression { "," string ":" expression } ] "}"
 
