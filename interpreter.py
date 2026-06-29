@@ -36,8 +36,11 @@ class FunctionValue:
             local_env.define(param.name, arg)
 
         interpreter.loop_depth = 0
-        result = interpreter.eval_block(self.body, local_env)
-        interpreter.loop_depth = current_loop_state
+        
+        try:
+            result = interpreter.eval_block(self.body, local_env)
+        finally:
+            interpreter.loop_depth = current_loop_state
 
         return result
     
