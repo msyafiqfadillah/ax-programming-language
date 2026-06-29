@@ -30,11 +30,14 @@ class FunctionValue:
             raise RuntimeError(f"{self.params[-1]} is needed!")
 
         local_env = Environment({}, self.parent_env)
+        current_loop_state = interpreter.loop_depth
 
         for param, arg in zip(self.params, args):
             local_env.define(param.name, arg)
 
+        interpreter.loop_depth = 0
         result = interpreter.eval_block(self.body, local_env)
+        interpreter.loop_depth = current_loop_state
 
         return result
     
