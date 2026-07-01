@@ -19,7 +19,7 @@ class Scanner:
 
     def peek(self):
         if (self.is_eof()):
-            raise TypeError("Unterminated string literal")
+            return None
         
         return self.raw_source[self.c_index]
 
@@ -43,6 +43,9 @@ class Scanner:
 
         while (not self.is_eof() and self.peek() != quote):
             result += self.advance()
+
+        if (self.is_eof()):
+            raise TypeError("Unterminated string literal")
 
         self.advance()
 
