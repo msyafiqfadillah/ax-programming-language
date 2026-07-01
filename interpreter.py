@@ -146,7 +146,7 @@ class Interpreter:
             name = stmt.declaration.id.name
             value = self.eval_expression(stmt.declaration.init)
 
-            if ((name in self.env.record) or (self.env.parent is not None and name in self.env.parent.record)):
+            if (name in self.env.record):
                 raise NameError(f"Variable '{name}' already declared")
 
             self.env.define(name, value)
