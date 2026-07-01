@@ -45,8 +45,9 @@ class Identifier:
         return self.name
 
 class Literal:
-    def __init__(self, value):
+    def __init__(self, value, type):
         self.value = value
+        self.type = type
 
     def __repr__(self):
         return str(self.value)
