@@ -115,6 +115,9 @@ class Interpreter:
 
             if (self.env.resolve(name)):
                 return ("env", name)
+            else:
+                raise NameError(f"Variable {name} is not defined")
+
         if (isinstance(node, nodes.PostfixExpression)):
             container, key = self.resolve_assignment(node.exp)
 

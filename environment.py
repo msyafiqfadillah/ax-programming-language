@@ -9,18 +9,28 @@ class Environment:
         return value
 
     def assign(self, name, value):
-        self.resolve(name).record[name] = value
+        env = self.resolve(name)
+
+        if (env is None):
+            raise NameError(f"Variable '{name}' is not defined")
+
+        env.record[name] = value
 
         return value
     
     def lookup(self, name):
-        return self.resolve(name).record[name]
+        env = self.resolve(name)
+
+        if (env is None):
+            raise NameError(f"Variable '{name}' is not defined")
+
+        return env.record[name]
 
     def resolve(self, name):
         if (name in self.record.keys()):
             return self
         
         if (self.parent is None):
-            raise ReferenceError(f"Variable {name} is not defined")
+            return None
         
         return self.parent.resolve(name)
