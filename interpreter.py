@@ -193,7 +193,7 @@ class Interpreter:
             else:
                 raise RuntimeError("Cannot use return outside block")
         elif (isinstance(stmt, nodes.IfStatement)):
-            if ((stmt.condition is None) or (helper.is_truhty(self.eval_expression(stmt.condition)))):
+            if ((stmt.condition is None) or (helper.is_truthy(self.eval_expression(stmt.condition)))):
                 local_env = Environment({}, self.env)
 
                 self.eval_block(stmt.body, local_env)
@@ -206,7 +206,7 @@ class Interpreter:
             self.loop_depth += 1
 
             try:
-                while (helper.is_truhty(self.eval_expression(stmt.condition))):
+                while (helper.is_truthy(self.eval_expression(stmt.condition))):
                     try:
                         local_env = Environment({}, self.env)
 
@@ -292,9 +292,9 @@ class Interpreter:
                 return helper.bool_converter(left < right)
             
             if (op == Operators.OR):
-                return helper.bool_converter(helper.is_truhty(left) or helper.is_truhty(right))
+                return helper.bool_converter(helper.is_truthy(left) or helper.is_truthy(right))
             if (op == Operators.AND):
-                return helper.bool_converter(helper.is_truhty(left) and helper.is_truhty(right))
+                return helper.bool_converter(helper.is_truthy(left) and helper.is_truthy(right))
 
             raise TypeError(f"Unknown operator {op}")
         
@@ -307,7 +307,7 @@ class Interpreter:
             if (op == "-"):
                 return 0 - right
             if (op == "!"):
-                return helper.bool_converter(not helper.is_truhty(right))
+                return helper.bool_converter(not helper.is_truthy(right))
         
         if (isinstance(expr, nodes.CallExpression)):
             if (isinstance(expr.callee, nodes.CallExpression)):

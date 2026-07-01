@@ -7,5 +7,5 @@ def is_eof(c_index, data):
 def bool_converter(value):
     return Keywords.TRUE if value else Keywords.FALSE
 
-def is_truhty(value):
+def is_truthy(value):
     return value not in ("", Keywords.FALSE, Keywords.EMPTY, Keywords.UNDEFINED)
