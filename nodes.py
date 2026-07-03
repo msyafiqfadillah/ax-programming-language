@@ -97,18 +97,18 @@ class ReturnStatement:
         return f"return {self.argument}"
     
 class ListExpression:
-    def __init__(self, values):
-        self.values = values
+    def __init__(self, value):
+        self.value = value
 
     def __repr__(self):
-        return f"[ {", ".join(repr(s) for s in self.values)} ]"
+        return f"[ {", ".join(repr(s) for s in self.value)} ]"
     
 class HashmapExpression:
-    def __init__(self, values):
-        self.values = values 
+    def __init__(self, value):
+        self.value = value 
     
     def __repr__(self):
-        return "{" + f", ".join([f"{key} : {value}" for key, value in self.values.items()]) + "}"
+        return "{" + f", ".join([f"{key} : {value}" for key, value in self.value.items()]) + "}"
     
 class UnaryExpression:
     def __init__(self, operator, value):
