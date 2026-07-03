@@ -2,6 +2,7 @@ import helper
 import nodes
 
 from tokens.operators import Operators
+from tokens.keywords import Keywords
 from environment import Environment
 from scanner import Scanner
 from parser import Parser
@@ -54,46 +55,80 @@ class BuiltinValue:
         return self.func(*evaluated_args)
     
 class ListValue:
-    def __init__(self, values):
-        self.values = values
-
-    def operate(self, interpreter, start, end=None):
-        if (end is None):
-            return self.indexAt(interpreter, start)
-        else:
-            return self.slice(interpreter, start, end)
+    def __init__(self, value):
+        self.value = value
 
     def indexAt(self, interpreter, index):
-        return self.values[interpreter.eval_expression(index)]
+        if (isinstance(index, NumberValue)):
+            return self.value[interpreter.eval_expression(index).value]
+
+        return None
     
     def replaceAt(self, index, value):
-        self.values[index] = value
+        if (isinstance(index, NumberValue)):
+            self.value[index.value] = value
+
+        return None
     
     def slice(self, interpreter, start, end):
-        return ListValue(self.values[interpreter.eval_expression(start):interpreter.eval_expression(end)])
-    
+        if (isinstance(start, NumberValue) and isinstance(end, NumberValue)):
+            return ListValue(self.value[interpreter.eval_expression(start):interpreter.eval_expression(end)])
+
+        return None
+
     def push(self, value):
-        self.values.append(value)
+        self.value.append(value)
 
     def __repr__(self):
-        rep = f"[ {", ".join([str(expr) for expr in self.values])} ]"
+        rep = f"[ {", ".join([str(expr) for expr in self.value])} ]"
 
         return rep
     
 class HashmapValue:
-    def __init__(self, values):
-        self.values = values
+    def __init__(self, value):
+        self.value = value
 
     def valueAt(self, interpreter, key):
-        return self.values[interpreter.eval_expression(key)]
+        return self.value[interpreter.eval_expression(key).value]
     
     def replaceAt(self, key, value):
-        self.values[key] = value
+        if (isinstance(key, StringValue)):
+            self.value[key.value] = value
+
+        return None
 
     def __repr__(self):
-        rep = "{ " + f"{", ".join([f"{key} : {value}" for key, value in self.values.items()])}" + " }"
+        rep = "{ " + f"{", ".join([f"{key} : {value}" for key, value in self.value.items()])}" + " }"
 
         return rep
+
+class BooleanValue:
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return str(self.value).lower()
+
+class NumberValue:
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return str(self.value)
+
+class StringValue:
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return f"\"{self.value}\""
+
+class EmptyValue:
+    def __init__(self):
+        self.value = None
+
+    def __repr__(self):
+        return f"{self.value}"
 
 class Interpreter:
     def __init__(self):
@@ -124,7 +159,10 @@ class Interpreter:
             if (container == "env"):
                 parent_value = self.env.lookup(key)
             else:
-                parent_value = container.indexAt(self, key)
+                if (isinstance(container, ListValue)):
+                    parent_value = container.indexAt(self, key)
+                elif (isinstance(container, HashmapValue)):
+                    parent_value = container.valueAt(self, key)
 
             index = self.eval_expression(node.start_exp)
 
@@ -163,20 +201,23 @@ class Interpreter:
             if (container == "env"):
                 old_value = self.env.lookup(key)
             else:
-                old_value = container.values[key]
+                if (isinstance(container, ListValue)):
+                    old_value = container.indexAt(self, key)
+                elif (isinstance(container, HashmapValue)):
+                    old_value = container.valueAt(self, key)
 
             if (stmt.operator["value"] == Operators.A_EQUAL):
-                value = old_value + value
+                value = NumberValue(old_value.value + value.value)
             elif (stmt.operator["value"] == Operators.M_EQUAL):
-                value = old_value * value
+                value = NumberValue(old_value.value * value.value)
             elif (stmt.operator["value"] == Operators.S_EQUAL):
-                value = old_value - value
+                value = NumberValue(old_value.value - value.value)
             elif (stmt.operator["value"] == Operators.D_EQUAL):
-                value = old_value / value
+                value = NumberValue(old_value.value / value.value)
             elif (stmt.operator["value"] == Operators.P_EQUAL):
-                value = old_value ** value
+                value = NumberValue(old_value.value ** value.value)
             elif (stmt.operator["value"] == Operators.MO_EQUAL):
-                value = old_value % value
+                value = NumberValue(old_value.value % value.value)
 
             if (container == "env"):
                 self.env.assign(key, value)
@@ -196,7 +237,7 @@ class Interpreter:
             else:
                 raise RuntimeError("Cannot use return outside block")
         elif (isinstance(stmt, nodes.IfStatement)):
-            if ((stmt.condition is None) or (helper.is_truthy(self.eval_expression(stmt.condition)))):
+            if ((stmt.condition is None) or (self.eval_expression(stmt.condition).value)):
                 local_env = Environment({}, self.env)
 
                 self.eval_block(stmt.body, local_env)
@@ -209,7 +250,7 @@ class Interpreter:
             self.loop_depth += 1
 
             try:
-                while (helper.is_truthy(self.eval_expression(stmt.condition))):
+                while (self.eval_expression(stmt.condition).value):
                     try:
                         local_env = Environment({}, self.env)
 
@@ -237,22 +278,19 @@ class Interpreter:
         return self.eval_expression(stmt)
 
     def eval_expression(self, expr):
-        if (isinstance(expr, str) or isinstance(expr, int)):
-            return expr
-
         if (isinstance(expr, nodes.Literal)):
-            v = expr.value
+            value = expr.value
+            type_value = expr.type
 
-            # try to convert numeric strings to numbers
-            if (isinstance(v, str)):
-                try:
-                    if ("." in v):
-                        return float(v)
-                    return int(v)
-                except Exception:
-                    return v
-
-            return v
+            match type_value:
+                case "BOOLEAN":
+                    return BooleanValue(value)
+                case "NUMBER":
+                    return NumberValue(value)
+                case "STRING":
+                    return StringValue(value)
+                case "EMPTY":
+                    return EmptyValue()
         
         if (isinstance(expr, nodes.Identifier)):
             _, key = self.resolve_assignment(expr)
@@ -269,48 +307,62 @@ class Interpreter:
             op = expr.operator
 
             if (op == Operators.ADDITION):
-                return left + right
-            if (op == Operators.SUBTRACTION):
-                return left - right
-            if (op == Operators.MULTIPLICATION):
-                return left * right
-            if (op == Operators.DIVISION):
-                return left / right
-            if (op == Operators.MODULO):
-                return left % right
-            if (op == Operators.POWER):
-                return left ** right
+                if (isinstance(left, NumberValue) and isinstance(right, NumberValue)):
+                    return NumberValue(left.value + right.value)
+            elif (op == Operators.SUBTRACTION):
+                if (isinstance(left, NumberValue) and isinstance(right, NumberValue)):
+                    return NumberValue(left.value - right.value)
+            elif (op == Operators.MULTIPLICATION):
+                if (isinstance(left, NumberValue) and isinstance(right, NumberValue)):
+                    return NumberValue(left.value * right.value)
+            elif (op == Operators.DIVISION):
+                if (isinstance(left, NumberValue) and isinstance(right, NumberValue)):
+                    return NumberValue(left.value / right.value)
+            elif (op == Operators.MODULO):
+                if (isinstance(left, NumberValue) and isinstance(right, NumberValue)):
+                    return NumberValue(left.value % right.value)
+            elif (op == Operators.POWER):
+                if (isinstance(left, NumberValue) and isinstance(right, NumberValue)):
+                    return NumberValue(left.value ** right.value)  
+            elif (op == Operators.GREATER):
+                if (isinstance(left, NumberValue) and isinstance(right, NumberValue)):
+                    return BooleanValue(left.value > right.value)
+            elif (op == Operators.LESS):
+                if (isinstance(left, NumberValue) and isinstance(right, NumberValue)):
+                    return BooleanValue(left.value < right.value)
+            elif (op == Operators.G_EQUAL):
+                if (isinstance(left, NumberValue) and isinstance(right, NumberValue)):
+                    return BooleanValue(left.value >= right.value)
+            elif (op == Operators.L_EQUAL):
+                if (isinstance(left, NumberValue) and isinstance(right, NumberValue)):
+                    return BooleanValue(left.value <= right.value)
+            elif (op == Operators.D_EQUAL):
+                if (isinstance(left, (BooleanValue, StringValue, NumberValue)) and isinstance(right, (BooleanValue, StringValue, NumberValue))):
+                    return BooleanValue(left.value == right.value)
+            elif (op == Operators.N_EQUAL):
+                if (isinstance(left, (BooleanValue, StringValue, NumberValue)) and isinstance(right, (BooleanValue, StringValue, NumberValue))):
+                    return BooleanValue(left.value != right.value)
+            elif (op == Operators.AND):
+                if (isinstance(left, (BooleanValue, StringValue, NumberValue)) and isinstance(right, (BooleanValue, StringValue, NumberValue))):
+                    return BooleanValue(left.value and right.value)
+            elif (op == Operators.OR):
+                if (isinstance(left, (BooleanValue, StringValue, NumberValue)) and isinstance(right, (BooleanValue, StringValue, NumberValue))):
+                    return BooleanValue(left.value or right.value)
 
-            if (op == Operators.G_EQUAL):
-                return helper.bool_converter(left >= right)
-            if (op == Operators.L_EQUAL):
-                return helper.bool_converter(left <= right)
-            if (op == Operators.D_EQUAL):
-                return helper.bool_converter(left == right)
-            if (op == Operators.N_EQUAL):
-                return helper.bool_converter(left != right)
-            if (op == Operators.GREATER):
-                return helper.bool_converter(left > right)
-            if (op == Operators.LESS):
-                return helper.bool_converter(left < right)
-            
-            if (op == Operators.OR):
-                return helper.bool_converter(helper.is_truthy(left) or helper.is_truthy(right))
-            if (op == Operators.AND):
-                return helper.bool_converter(helper.is_truthy(left) and helper.is_truthy(right))
+            raise TypeError(f"Operation with '{op}' is invalid between {type(left).__name__} and {type(right).__name__}")
 
-            raise TypeError(f"Unknown operator {op}")
-        
         if (isinstance(expr, nodes.UnaryExpression)):
             op = expr.operator
             right = self.eval_expression(expr.value)
 
             if (op == "+"):
-                return 0 + right
-            if (op == "-"):
-                return 0 - right
-            if (op == "!"):
-                return helper.bool_converter(not helper.is_truthy(right))
+                if (isinstance(right, NumberValue)):
+                    return NumberValue(+right.value)
+            elif (op == "-"):
+                if (isinstance(right, NumberValue)):
+                    return NumberValue(-right.value)
+            elif (op == "!"):
+                return BooleanValue(not right.value)
         
         if (isinstance(expr, nodes.CallExpression)):
             if (isinstance(expr.callee, nodes.CallExpression)):
@@ -328,20 +380,26 @@ class Interpreter:
             return func
 
         if (isinstance(expr, nodes.ListExpression)):
-            return ListValue([self.eval_expression(e) for e in expr.values])
+            return ListValue([self.eval_expression(e) for e in expr.value])
         
         if (isinstance(expr, nodes.HashmapExpression)):
-            return HashmapValue({self.eval_expression(key) : self.eval_expression(value) for key, value in expr.values.items()})
+            return HashmapValue({self.eval_expression(key).value : self.eval_expression(value) for key, value in expr.value.items()})
         
         if (isinstance(expr, nodes.PostfixExpression)):
             eval_expr = self.eval_expression(expr.exp)
+            start_exp = self.eval_expression(expr.start_exp)
 
             if (isinstance(eval_expr, ListValue)):
-                return eval_expr.operate(self, expr.start_exp, expr.end_exp)
-            elif (isinstance(eval_expr, HashmapValue)):
-                return eval_expr.valueAt(self, expr.start_exp)
+                if (not expr.end_exp):
+                    return eval_expr.indexAt(self, start_exp)
+                else:
+                    end_exp = self.eval_expression(expr.end_exp)
 
-        if (isinstance(expr, (FunctionValue, ListValue, HashmapValue))):
+                    return eval_expr.slice(self, start_exp, end_exp)
+            elif (isinstance(eval_expr, HashmapValue)):
+                return eval_expr.valueAt(self, start_exp)
+
+        if (isinstance(expr, (FunctionValue, ListValue, HashmapValue, BooleanValue, NumberValue, StringValue, EmptyValue))):
             return expr
 
         raise TypeError(f"Unknown expression type: {expr}")
@@ -349,7 +407,7 @@ class Interpreter:
 
 global_env = Environment({
     "show": BuiltinValue(lambda *args : print(*args)),
-    "length": BuiltinValue(lambda arg : len(arg.values)),
+    "length": BuiltinValue(lambda arg : len(arg.value)),
     "push": BuiltinValue(lambda list_value, *args : list(map(list_value.push, args)))
 })
 
@@ -387,11 +445,11 @@ def main():
         # push(g[0][1], 22)
         # show(g)
 
-        var ttt = { 123 : 123, "uuu" : 999 }
+        var ttt = { "123" : 123, "uuu" : 999 }
 
-        show(ttt[123])
+        show(ttt["123"])
 
-        set ttt[123] = 5000
+        set ttt["123"] = 5000
 
         show(ttt)
         push(g[0][1], 22)
