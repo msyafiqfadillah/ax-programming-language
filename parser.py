@@ -413,22 +413,23 @@ class Parser:
     def parse_string(self):
         value = self.match("STRING", "type")["value"]
 
-        return nodes.Literal(value)
+        return nodes.Literal(value, "STRING")
 
     def parse_number(self):
         value = self.match("NUMBER", "type")["value"]
+        numeric = float(value) if ("." in value) else int(value)
 
-        return nodes.Literal(value)
+        return nodes.Literal(numeric, "NUMBER")
 
     def parse_boolean(self):
-        value = self.match(self.peek()["value"], "value")["value"]
+        value = helper.is_truthy(self.match(self.peek()["value"], "value")["value"])
 
-        return nodes.Literal(value)
+        return nodes.Literal(value, "BOOLEAN")
 
     def parse_empty(self):
         self.match(Keywords.EMPTY, "value")
 
-        return nodes.Literal(Keywords.EMPTY)
+        return nodes.Literal(Keywords.EMPTY, "EMPTY")
     
     def parse_undefined(self):
         self.match(Keywords.UNDEFINED, "value")
