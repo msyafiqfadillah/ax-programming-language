@@ -1,10 +1,34 @@
+from gtypes import (
+        FunctionType, HashmapType, ListType, 
+        StringType, NumberType, EmptyType,
+        BooleanType, AnyType, unify_types
+)
 from environment import Environment
 
-class FunctionValue:
+class Value:
+    def __init__(self, type):
+        self.type = type
+
+    def get_type(self):
+        return self.type
+
+class FunctionValue(Value):
     def __init__(self, params, body, parent_env):
         self.params = params 
         self.body = body
         self.parent_env = parent_env
+
+        if (len(self.params) > 0):
+            tp = [AnyType() for _ in range(len(self.params))]
+        else:
+            tp = [EmptyType()]
+
+        super().__init__(FunctionType(tp, AnyType()))
+
+    def __get_value_type(self):
+        rdc = tuple([tp.type for tp in self.params])
+
+        return rdc
         
     def call(self, interpreter, args):
         if (len(args) != len(self.params)):
@@ -23,6 +47,9 @@ class FunctionValue:
         finally:
             interpreter.loop_depth = current_loop_state
 
+        if (result is not None):
+            self.type = FunctionType(self.__get_value_type(), result.type)
+
         return result
     
 class BuiltinValue:
@@ -34,9 +61,14 @@ class BuiltinValue:
 
         return self.func(*evaluated_args)
     
-class ListValue:
+class ListValue(Value):
     def __init__(self, value):
         self.value = value
+
+        super().__init__(ListType(self.__get_value_type()))
+
+    def __get_value_type(self):
+        return unify_types([tp.type for tp in self.value])
 
     def indexAt(self, interpreter, index):
         if (isinstance(index, NumberValue)):
@@ -64,9 +96,14 @@ class ListValue:
 
         return rep
     
-class HashmapValue:
+class HashmapValue(Value):
     def __init__(self, value):
         self.value = value
+
+        super().__init__(HashmapType(self.__get_value_type()))
+
+    def __get_value_type(self):
+        return unify_types([tp.type for tp in self.value.values()])
 
     def valueAt(self, interpreter, key):
         return self.value[interpreter.eval_expression(key).value]
@@ -82,30 +119,84 @@ class HashmapValue:
 
         return rep
 
-class BooleanValue:
+class BooleanValue(Value):
     def __init__(self, value):
+        super().__init__(BooleanType())
+
         self.value = value
 
     def __repr__(self):
         return str(self.value).lower()
 
-class NumberValue:
+    def __eq__(self, other):
+        return self.value == other.value
+    
+    def __hash__(self):
+        return hash(self.value)
+
+class NumberValue(Value):
     def __init__(self, value):
+        super().__init__(NumberType())
+        
         self.value = value
 
     def __repr__(self):
         return str(self.value)
+    
+    def __eq__(self, other):
+        return self.value == other.value
+    
+    def __hash__(self):
+        return hash(self.value)
 
-class StringValue:
+class StringValue(Value):
     def __init__(self, value):
+        super().__init__(StringType())
+
         self.value = value
 
     def __repr__(self):
         return f"\"{self.value}\""
+    
+    def __eq__(self, other):
+        return self.value == other.value
+    
+    def __hash__(self):
+        return hash(self.value)
 
-class EmptyValue:
+class EmptyValue(Value):
     def __init__(self):
+        super().__init__(EmptyType())
+
         self.value = None
 
     def __repr__(self):
         return f"{self.value}"
+
+    def __eq__(self, other):
+        return self.value == other.value
+    
+    def __hash__(self):
+        return hash(self.value)
+
+if (__name__ == "__main__"):
+    # x = HashmapValue({ 
+    #         "a" : ListValue([ NumberValue(123), NumberValue(999) ]),
+    #         "b" : ListValue([ HashmapValue({ "a": NumberValue(123), "b": NumberValue(999) }) ]) 
+    #     })
+
+    x = ListValue([
+        ListValue([ ListValue([ StringValue(123), StringValue(999) ]) ]),
+        ListValue([ ListValue([ StringValue("abc"), NumberValue(111) ]) ])
+    ])
+
+    # x = ListValue([
+    #     HashmapValue({ "a": NumberValue(123), "b": NumberValue(999) }),
+    #     HashmapValue({ "a": NumberValue(123), "b": NumberValue(999) })
+    # ])
+
+    # x = FunctionValue([
+    #     NumberValue(123), NumberValue(999)
+    # ], { "return 123" }, {})
+
+    print(x.type)
