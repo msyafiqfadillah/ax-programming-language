@@ -1,39 +1,41 @@
 class Type:
+    def __init__(self, typeName):
+        self.typeName = typeName
+
     def is_assignable(self, other):
         return (self == other 
             or isinstance(other, EmptyType) 
             or isinstance(other, AnyType))
 
-class NumberType(Type):
+    def __hash__(self):
+        return hash(self.__repr__())
+
     def __eq__(self, other):
-        return isinstance(other, NumberType)
+        return isinstance(other, type(self))
 
     def __repr__(self):
-        return "number"
+        return self.typeName
+
+class NumberType(Type):
+    def __init__(self):
+        super().__init__("number")
 
 class StringType(Type):
-    def __eq__(self, other):
-        return isinstance(other, StringType)
-
-    def __repr__(self):
-        return "string"
+    def __init__(self):
+        super().__init__("string")
 
 class BooleanType(Type):
-    def __eq__(self, other):
-        return isinstance(other, BooleanType)
-    
-    def __repr__(self):
-        return "boolean"
+    def __init__(self):
+        super().__init__("boolean")
 
 class EmptyType(Type):
-    def __eq__(self, other):
-        return isinstance(other, EmptyType)
-    
-    def __repr__(self):
-        return "empty"
+    def __init__(self):
+        super().__init__("empty")
 
 class ListType(Type):
     def __init__(self, type):
+        super().__init__(f"list[{type}]")
+
         self.type = type
 
     def is_assignable(self, other):
@@ -48,12 +50,14 @@ class ListType(Type):
     def __eq__(self, other):
         return isinstance(other, ListType) and (self.type == other.type)    
 
-    def __repr__(self):
-        return f"list[{self.type}]"
+    def __hash__(self):
+        return hash(self.typeName)
 
 # key type always String
 class HashmapType(Type):
     def __init__(self, type):
+        super().__init__(f"hashmap[{type}]")
+
         self.type = type
 
     def is_assignable(self, other):
@@ -68,11 +72,15 @@ class HashmapType(Type):
     def __eq__(self, other):
         return isinstance(other, HashmapType) and (self.type == other.type)
 
-    def __repr__(self):
-        return f"hashmap[{self.type}]"
+    def __hash__(self):
+        return hash(self.typeName)
 
 class FunctionType(Type):
     def __init__(self, param_types, return_type):
+        params = ", ".join([str(t) for t in param_types])
+
+        super().__init__(f"prc({params}) -> {return_type}")
+
         self.param_types = param_types
         self.return_type = return_type
 
@@ -115,20 +123,30 @@ class FunctionType(Type):
             and self.param_types == other.param_types
             and self.return_type == other.return_type)
 
-    def __repr__(self):
-        params = ", ".join([str(t) for t in self.param_types])
-
-        return f"prc({params}) -> {self.return_type}"
-
 class AnyType(Type):
-    def __eq__(self, other):
-        return isinstance(other, AnyType)
+    def __init__(self):
+        super().__init__("any")
 
     def is_assignable(self, other):
         return True
 
-    def __repr__(self):
-        return "any"
+
+def unify_types(types):
+    if not types:
+        return AnyType()
+
+    first = types[0]
+
+    if all(t == first for t in types):
+        return first
+
+    if all(isinstance(t, ListType) for t in types):
+        return ListType(unify_types([t.type for t in types]))
+
+    if all(isinstance(t, HashmapType) for t in types):
+        return HashmapType(unify_types([t.type for t in types]))
+
+    return AnyType()
 
 
 if (__name__ == "__main__"):
