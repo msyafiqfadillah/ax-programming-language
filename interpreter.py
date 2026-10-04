@@ -93,6 +93,9 @@ class Interpreter:
 
             if (container == "env"):
                 old_value = self.env.lookup(key)
+
+                if (not old_value.type.is_assignable(value.type)):
+                    raise RuntimeError(f"Cannot assign value of type {value.type} to variable of type {old_value.type}")
             else:
                 if (isinstance(container, ListValue)):
                     old_value = container.indexAt(self, key)
@@ -435,11 +438,11 @@ def main():
     # '''
 
     sample = '''
-        prc x(a, b) {
-            return a + b
-        }
+        var x = 10
 
-        show(x(1, 2))
+        set x = "abc"
+
+        show(x)
     '''
 
     interp = Interpreter()
