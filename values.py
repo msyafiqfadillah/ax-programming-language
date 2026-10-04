@@ -53,6 +53,10 @@ class FunctionValue(Value):
 
         return result
 
+    def __repr__(self):
+        params = ", ".join([param.name for param in self.params])
+        return f"prc ({params}) {self.body}"
+
 class BuiltinValue:
     def __init__(self, func):
         self.func = func
