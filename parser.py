@@ -17,7 +17,7 @@ class Parser:
             self.index += 1
 
             return c_token
-        
+
         raise TypeError(f"Expected token {expected}, but got {c_token["value"]}")
 
     def match_assignment(self):
@@ -30,7 +30,7 @@ class Parser:
         else:
             raise TypeError(f"Expected token assignment, but got {c_token["value"]}")
 
-    def peek(self):        
+    def peek(self):
         return self.tokens[self.index]
 
     def parse_program(self, tokens):
@@ -76,7 +76,7 @@ class Parser:
         expression = self.parse_expression()
 
         return nodes.VariableDeclaration(declaration=nodes.VariableDeclarator(id=nodes.Identifier(name=identifier["value"]), init=expression))
-    
+
     def parse_set(self):
         self.match(Keywords.SET, "value")
         postfix = self.parse_postfix()
@@ -94,7 +94,7 @@ class Parser:
         body = self.parse_block()
 
         return nodes.FunctionDeclaration(nodes.Identifier(identifier["value"]), params, body)
-    
+
     def parse_if(self):
         self.match(Keywords.IF, "value")
         self.match(Punctuations.PARANTHESSES_O, "value")
@@ -104,7 +104,7 @@ class Parser:
         alternate = self.parse_alternate()
 
         return nodes.IfStatement(condition, body, alternate)
-    
+
     def parse_alternate(self):
         if (not helper.is_eof(self.index, self.tokens)):
             if (self.peek()["value"] == Keywords.MAYBE):
@@ -133,10 +133,10 @@ class Parser:
         body = self.parse_block()
 
         return nodes.LoopStatement(condition, body)
-    
+
     def parse_block(self):
         self.match(Punctuations.CURVED_O, "value")
-        
+
         body = []
 
         while (self.peek()["value"] != Punctuations.CURVED_C):
@@ -147,7 +147,7 @@ class Parser:
         self.match(Punctuations.CURVED_C, "value")
 
         return nodes.BlockStatement(body)
-    
+
     def parse_params(self):
         params = []
 
@@ -160,7 +160,7 @@ class Parser:
                 self.match(Punctuations.COMMA, "value")
 
         return params
-    
+
     def parse_args(self):
         args = []
 
@@ -173,7 +173,7 @@ class Parser:
                 self.match(Punctuations.COMMA, "value")
 
         return args
-    
+
     def parse_return(self):
         self.match(Keywords.RETURN, "value")
         expr = self.parse_expression()
@@ -189,7 +189,7 @@ class Parser:
         while (not helper.is_eof(self.index, self.tokens) and self.peek()["value"] == Operators.OR):
             current = self.match(self.peek()["value"], "value")
             right = self.parse_logical_and()
-            
+
             node_logical_and = nodes.BinaryExpression(node_logical_and, current["value"], right)
 
         return node_logical_and
@@ -200,7 +200,7 @@ class Parser:
         while (not helper.is_eof(self.index, self.tokens) and self.peek()["value"] == Operators.AND):
             current = self.match(self.peek()["value"], "value")
             right = self.parse_equality()
-            
+
             node_equality = nodes.BinaryExpression(node_equality, current["value"], right)
 
         return node_equality
@@ -208,14 +208,14 @@ class Parser:
     def parse_equality(self):
         node_comparison = self.parse_comparison()
 
-        while (not helper.is_eof(self.index, self.tokens) 
+        while (not helper.is_eof(self.index, self.tokens)
                and self.peek()["value"] in (
-                   Operators.D_EQUAL, 
+                   Operators.E_EQUAL,
                    Operators.N_EQUAL
                 )):
             current = self.match(self.peek()["value"], "value")
             right = self.parse_comparison()
-            
+
             node_comparison = nodes.BinaryExpression(node_comparison, current["value"], right)
 
         return node_comparison
@@ -223,16 +223,16 @@ class Parser:
     def parse_comparison(self):
         node_additive = self.parse_additive()
 
-        while (not helper.is_eof(self.index, self.tokens) 
+        while (not helper.is_eof(self.index, self.tokens)
                and self.peek()["value"] in (
-                   Operators.GREATER, 
-                   Operators.LESS, 
-                   Operators.G_EQUAL, 
+                   Operators.GREATER,
+                   Operators.LESS,
+                   Operators.G_EQUAL,
                    Operators.L_EQUAL
                 )):
             current = self.match(self.peek()["value"], "value")
             right = self.parse_additive()
-            
+
             node_additive = nodes.BinaryExpression(node_additive, current["value"], right)
 
         return node_additive
@@ -240,14 +240,14 @@ class Parser:
     def parse_additive(self):
         node_multiplicative = self.parse_multiplicative()
 
-        while (not helper.is_eof(self.index, self.tokens) 
+        while (not helper.is_eof(self.index, self.tokens)
                 and self.peek()["value"] in (
-                    Operators.SUBTRACTION, 
+                    Operators.SUBTRACTION,
                     Operators.ADDITION
                 )):
             current = self.match(self.peek()["value"], "value")
             right = self.parse_multiplicative()
-            
+
             node_multiplicative = nodes.BinaryExpression(node_multiplicative, current["value"], right)
 
         return node_multiplicative
@@ -255,15 +255,15 @@ class Parser:
     def parse_multiplicative(self):
         node_power = self.parse_power()
 
-        while (not helper.is_eof(self.index, self.tokens) 
+        while (not helper.is_eof(self.index, self.tokens)
                and self.peek()["value"] in (
-                   Operators.MULTIPLICATION, 
-                   Operators.DIVISION, 
+                   Operators.MULTIPLICATION,
+                   Operators.DIVISION,
                    Operators.MODULO
                 )):
             current = self.match(self.peek()["value"], "value")
             right = self.parse_power()
-            
+
             node_power = nodes.BinaryExpression(node_power, current["value"], right)
 
         return node_power
@@ -278,12 +278,12 @@ class Parser:
             return nodes.BinaryExpression(node_unary, operator["value"], right)
 
         return node_unary
-    
+
     def parse_unary(self):
-        if (not helper.is_eof(self.index, self.tokens) 
+        if (not helper.is_eof(self.index, self.tokens)
             and self.peek()["value"] in (
-                Operators.NEGATION, 
-                Operators.ADDITION, 
+                Operators.NEGATION,
+                Operators.ADDITION,
                 Operators.SUBTRACTION
             )):
             operator = self.match(self.peek()["value"], "value")
@@ -292,11 +292,11 @@ class Parser:
             return nodes.UnaryExpression(operator["value"], right)
 
         return self.parse_postfix()
-    
+
     def parse_postfix(self):
         left = self.parse_atom()
 
-        while (not helper.is_eof(self.index, self.tokens) 
+        while (not helper.is_eof(self.index, self.tokens)
                and self.peek()["value"] in (
                    Punctuations.SQUARE_O,
                    Punctuations.PARANTHESSES_O
@@ -321,12 +321,12 @@ class Parser:
                 left = nodes.PostfixExpression(left, f_exp, s_exp)
 
         return left
-    
+
     def parse_atom(self):
         current = self.peek()
-        
-        if (current["type"] in ("STRING", "NUMBER") 
-            or (current["type"] == "KEYWORDS" 
+
+        if (current["type"] in ("STRING", "NUMBER")
+            or (current["type"] == "KEYWORDS"
                 and current["value"] in ("true", "false", "empty", "undefined"))):
             return self.parse_literal()
         elif (current["type"] == "IDENTIFIER"):
@@ -359,9 +359,9 @@ class Parser:
 
     def parse_list(self):
         expr_lst = []
-        
+
         self.match(Punctuations.SQUARE_O, "value")
-        
+
         while (not helper.is_eof(self.index, self.tokens) and self.peek()["value"] != Punctuations.SQUARE_C):
             if (self.peek()["value"] == Punctuations.SQUARE_O):
                 expr = self.parse_list()
@@ -379,7 +379,7 @@ class Parser:
 
     def parse_hashmap(self):
         self.match(Punctuations.CURVED_O, "value")
-        
+
         items = { }
 
         while (not helper.is_eof(self.index, self.tokens) and self.peek()["value"] != Punctuations.CURVED_C):
@@ -395,7 +395,7 @@ class Parser:
         self.match(Punctuations.CURVED_C, "value")
 
         return nodes.HashmapExpression(items)
-    
+
     def parse_literal(self):
         current = self.peek()
 
@@ -430,7 +430,7 @@ class Parser:
         self.match(Keywords.EMPTY, "value")
 
         return nodes.Literal(Keywords.EMPTY, "EMPTY")
-    
+
     def parse_undefined(self):
         self.match(Keywords.UNDEFINED, "value")
 
@@ -440,7 +440,7 @@ class Parser:
         self.match(Keywords.CONTINUE, "value")
 
         return nodes.ContinueStatement()
-    
+
     def parse_break(self):
         self.match(Keywords.BREAK, "value")
 
