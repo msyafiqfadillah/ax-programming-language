@@ -310,7 +310,8 @@ def push(list_value, *args):
 global_env = Environment({
     "show": BuiltinValue(lambda *args : print(*args)),
     "length": BuiltinValue(lambda arg : len(arg.value)),
-    "push": BuiltinValue(push)
+    "push": BuiltinValue(push),
+    "type": BuiltinValue(lambda arg : arg.type)
 })
 
 
@@ -444,11 +445,11 @@ def main():
     # '''
 
     sample = '''
-        var x = [1, 2, 3]
+        prc x() { }
 
-        set x[0] = "999"
+        x()
 
-        show(x)
+        show(type(x))
     '''
 
     interp = Interpreter()
