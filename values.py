@@ -48,6 +48,8 @@ class FunctionValue(Value):
 
         if (result is not None):
             self.type = FunctionType([arg.type for arg in args], result.type)
+        else:
+            self.type = FunctionType([arg.type for arg in args], EmptyType())
 
         return result
 
