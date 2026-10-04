@@ -5,8 +5,8 @@ from environment import Environment
 from scanner import Scanner
 from parser import Parser
 from values import (
-    StringValue, NumberValue, EmptyValue, 
-    ListValue, HashmapValue, BuiltinValue, 
+    StringValue, NumberValue, EmptyValue,
+    ListValue, HashmapValue, BuiltinValue,
     FunctionValue, BooleanValue
 )
 
@@ -36,7 +36,7 @@ class Interpreter:
             self.eval_statement(stmt)
 
         return self.env.record
-    
+
     def resolve_assignment(self, node):
         if (isinstance(node, nodes.Identifier)):
             name = node.name
@@ -60,15 +60,15 @@ class Interpreter:
             index = self.eval_expression(node.start_exp)
 
             return (parent_value, index)
-    
+
     def eval_block(self, stmts, local_env):
         parent_env = self.env
         self.env = local_env
- 
+
         try:
             for stmt in stmts.body:
                 self.eval_statement(stmt)
-                
+
             return None
         except ReturnException:
             return self.eval_expression(stmt.argument)
@@ -84,7 +84,7 @@ class Interpreter:
                 raise NameError(f"Variable '{name}' already declared")
 
             self.env.define(name, value)
-            
+
             return value
         elif (isinstance(stmt, nodes.VariableAssignment)):
             id = stmt.declaration.id
@@ -137,7 +137,7 @@ class Interpreter:
             else:
                 if (isinstance(stmt.alternate, nodes.IfStatement)):
                     self.eval_statement(stmt.alternate)
-            
+
             return
         elif (isinstance(stmt, nodes.LoopStatement)):
             self.loop_depth += 1
@@ -184,7 +184,7 @@ class Interpreter:
                     return StringValue(value)
                 case "EMPTY":
                     return EmptyValue()
-        
+
         if (isinstance(expr, nodes.Identifier)):
             _, key = self.resolve_assignment(expr)
             value = self.env.lookup(key)
@@ -216,7 +216,7 @@ class Interpreter:
                     return NumberValue(left.value % right.value)
             elif (op == Operators.POWER):
                 if (isinstance(left, NumberValue) and isinstance(right, NumberValue)):
-                    return NumberValue(left.value ** right.value)  
+                    return NumberValue(left.value ** right.value)
             elif (op == Operators.GREATER):
                 if (isinstance(left, NumberValue) and isinstance(right, NumberValue)):
                     return BooleanValue(left.value > right.value)
@@ -229,7 +229,7 @@ class Interpreter:
             elif (op == Operators.L_EQUAL):
                 if (isinstance(left, NumberValue) and isinstance(right, NumberValue)):
                     return BooleanValue(left.value <= right.value)
-            elif (op == Operators.D_EQUAL):
+            elif (op == Operators.E_EQUAL):
                 if (isinstance(left, (BooleanValue, StringValue, NumberValue)) and isinstance(right, (BooleanValue, StringValue, NumberValue))):
                     return BooleanValue(left.value == right.value)
             elif (op == Operators.N_EQUAL):
@@ -256,17 +256,17 @@ class Interpreter:
                     return NumberValue(-right.value)
             elif (op == "!"):
                 return BooleanValue(not right.value)
-        
+
         if (isinstance(expr, nodes.CallExpression)):
             if (isinstance(expr.callee, nodes.CallExpression)):
                 result = self.eval_expression(expr.callee)
             else:
                 result = self.env.lookup(expr.callee.name)
 
-            result = result.call(self, expr.arguments)
+            result = result.call(self, [self.eval_expression(arg) for arg in expr.arguments])
 
             return result
-        
+
         if (isinstance(expr, nodes.FunctionExpression)):
             func = FunctionValue(expr.params, expr.body, self.env)
 
@@ -274,10 +274,10 @@ class Interpreter:
 
         if (isinstance(expr, nodes.ListExpression)):
             return ListValue([self.eval_expression(e) for e in expr.value])
-        
+
         if (isinstance(expr, nodes.HashmapExpression)):
             return HashmapValue({self.eval_expression(key).value : self.eval_expression(value) for key, value in expr.value.items()})
-        
+
         if (isinstance(expr, nodes.PostfixExpression)):
             eval_expr = self.eval_expression(expr.exp)
             start_exp = self.eval_expression(expr.start_exp)
@@ -306,132 +306,140 @@ global_env = Environment({
 
 
 def main():
+    # sample = '''
+    #     ~ This is a example of comment ~
+    #     ~
+    #         You can use it as one line comment or multiline,
+    #         like this.
+    #     ~
+    #     # Or you can use hashtag as one line comment
+
+    #     prc x() {
+    #         prc z() {
+    #             return [[1, 2, 3, 100, 99, 98], [44, 33, 12]]
+    #         }
+
+    #         return z
+    #     }
+
+    #     prc o() {
+    #         return 222
+    #     }
+
+    #     var p = [1, 2, 3, 4]
+    #     var g = x()()
+
+    #     ~ show(x()()[0:3][1][0:2][0]) ~
+    #     show(g[0])
+
+    #     set g[0][1] = [9, 0, 7]
+
+    #     show(g)
+    #     # push(g[0][1], 22)
+    #     # show(g)
+
+    #     var ttt = { "123" : 123, "uuu" : 999 }
+
+    #     show(ttt["123"])
+
+    #     set ttt["123"] = 5000
+
+    #     show(ttt)
+    #     push(g[0][1], 22)
+    #     show(g)
+
+    #     ~
+    #         example of if else in ax (written with neovim)
+    #     ~
+
+    #     var nine = 9
+    #     var eight = 8
+
+    #     if (nine >= eight) {
+    #         show("yes, it's bigger")
+    #     } maybe (nine <= eight) {
+    #         show("no, it's not bigger")
+    #     } maybe (nine == eight) {
+    #         show("also not equal")
+    #     } whatever {
+    #         show("how?!")
+    #     }
+
+    #     ~
+    #         testing assignment operator
+    #     ~
+
+    #     var mmx = 10
+    #     set mmx += 1
+    #     set mmx *= 100
+
+    #     var zzm = { "a": 90, "b": 77 }
+    #     set zzm["a"] += 10
+
+    #     var lst = [10, 11, 90, 91]
+    #     set lst[2] -= 81
+
+    #     show(lst)
+
+    #     ~
+    #         testing loop statement
+    #     ~
+    #     ~
+    #     var mgmt = [1, 9, 90, 190, 1990]
+    #     var l_mgmt = length(mgmt)
+    #     var index = 0
+    #     var xxx = 0
+
+    #     loop (index < l_mgmt) {
+    #         show(mgmt[index])
+
+    #         set xxx = 0
+
+    #         loop (xxx < 3) {
+    #             if (xxx % 2 == 0) {
+    #                 continue
+    #             }
+
+    #             show(xxx)
+
+    #             set xxx += 1
+    #         }
+
+    #         set index += 1
+    #     }
+    #     ~
+    #     var oo = 0
+
+    #     loop (oo < 5) {
+    #         if (oo == 3) {
+    #             set oo += 1
+
+    #             continue
+    #         } maybe (oo == 4) {
+    #             break
+    #         }
+
+    #         show(oo)
+
+    #         set oo += 1
+    #     }
+
+    #     ~
+    #         testing lambda function
+    #     ~
+    #     var ggh = prc () {
+    #         show("testing", oo)
+    #     }
+
+    #     ggh()
+    # '''
+
     sample = '''
-        ~ This is a example of comment ~
-        ~
-            You can use it as one line comment or multiline,
-            like this.
-        ~
-        # Or you can use hashtag as one line comment
-        
-        prc x() {
-            prc z() {
-                return [[1, 2, 3, 100, 99, 98], [44, 33, 12]]
-            }
-
-            return z
+        prc x(a, b) {
+            return a + b
         }
 
-        prc o() {
-            return 222
-        }
-
-        var p = [1, 2, 3, 4]
-        var g = x()()
-
-        ~ show(x()()[0:3][1][0:2][0]) ~
-        show(g[0])
-
-        set g[0][1] = [9, 0, 7]
-
-        show(g)
-        # push(g[0][1], 22)
-        # show(g)
-
-        var ttt = { "123" : 123, "uuu" : 999 }
-
-        show(ttt["123"])
-
-        set ttt["123"] = 5000
-
-        show(ttt)
-        push(g[0][1], 22)
-        show(g)
-
-        ~
-            example of if else in ax (written with neovim)
-        ~
-
-        var nine = 9
-        var eight = 8
-
-        if (nine >= eight) {
-            show("yes, it's bigger")
-        } maybe (nine <= eight) {
-            show("no, it's not bigger")
-        } maybe (nine == eight) {
-            show("also not equal")
-        } whatever {
-            show("how?!")
-        }
-
-        ~
-            testing assignment operator
-        ~
-
-        var mmx = 10
-        set mmx += 1
-        set mmx *= 100
-
-        var zzm = { "a": 90, "b": 77 }
-        set zzm["a"] += 10
-
-        var lst = [10, 11, 90, 91]
-        set lst[2] -= 81
-
-        show(lst)
-
-        ~
-            testing loop statement 
-        ~
-        ~
-        var mgmt = [1, 9, 90, 190, 1990]
-        var l_mgmt = length(mgmt)
-        var index = 0
-        var xxx = 0
-
-        loop (index < l_mgmt) {
-            show(mgmt[index])
-            
-            set xxx = 0
-
-            loop (xxx < 3) {
-                if (xxx % 2 == 0) {
-                    continue
-                }
-                
-                show(xxx)
-
-                set xxx += 1
-            }
-
-            set index += 1
-        }
-        ~
-        var oo = 0 
-
-        loop (oo < 5) {
-            if (oo == 3) {
-                set oo += 1
-
-                continue
-            } maybe (oo == 4) {
-                break
-            }
-
-            show(oo)
-
-            set oo += 1
-        }
-
-        ~
-            testing lambda function
-        ~
-        var ggh = prc () { 
-            show("testing", oo) 
-        }
-
-        ggh()
+        show(x(1, 2))
     '''
 
     interp = Interpreter()

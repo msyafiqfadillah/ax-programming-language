@@ -1,5 +1,5 @@
 from gtypes import (
-        FunctionType, HashmapType, ListType, 
+        FunctionType, HashmapType, ListType,
         StringType, NumberType, EmptyType,
         BooleanType, AnyType, unify_types
 )
@@ -14,7 +14,7 @@ class Value:
 
 class FunctionValue(Value):
     def __init__(self, params, body, parent_env):
-        self.params = params 
+        self.params = params
         self.body = body
         self.parent_env = parent_env
 
@@ -25,14 +25,13 @@ class FunctionValue(Value):
 
         super().__init__(FunctionType(tp, AnyType()))
 
-    def __get_value_type(self):
-        rdc = tuple([tp.type for tp in self.params])
-
-        return rdc
-        
     def call(self, interpreter, args):
         if (len(args) != len(self.params)):
             raise RuntimeError(f"{self.params[-1]} is needed!")
+
+        for param, arg in zip(self.type.param_types, args):
+            if (not param.is_assignable(arg.type)):
+                raise RuntimeError("Type mismatch!")
 
         local_env = Environment({}, self.parent_env)
         current_loop_state = interpreter.loop_depth
@@ -41,26 +40,24 @@ class FunctionValue(Value):
             local_env.define(param.name, arg)
 
         interpreter.loop_depth = 0
-        
+
         try:
             result = interpreter.eval_block(self.body, local_env)
         finally:
             interpreter.loop_depth = current_loop_state
 
         if (result is not None):
-            self.type = FunctionType(self.__get_value_type(), result.type)
+            self.type = FunctionType([arg.type for arg in args], result.type)
 
         return result
-    
+
 class BuiltinValue:
     def __init__(self, func):
-        self.func = func 
+        self.func = func
 
     def call(self, interpreter, args):
-        evaluated_args = [interpreter.eval_expression(expr) for expr in args]
+        return self.func(*args)
 
-        return self.func(*evaluated_args)
-    
 class ListValue(Value):
     def __init__(self, value):
         self.value = value
@@ -75,13 +72,11 @@ class ListValue(Value):
             return self.value[interpreter.eval_expression(index).value]
 
         return None
-    
+
     def replaceAt(self, index, value):
         if (isinstance(index, NumberValue)):
             self.value[index.value] = value
 
-        return None
-    
     def slice(self, interpreter, start, end):
         if (isinstance(start, NumberValue) and isinstance(end, NumberValue)):
             return ListValue(self.value[interpreter.eval_expression(start):interpreter.eval_expression(end)])
@@ -95,7 +90,7 @@ class ListValue(Value):
         rep = f"[ {", ".join([str(expr) for expr in self.value])} ]"
 
         return rep
-    
+
 class HashmapValue(Value):
     def __init__(self, value):
         self.value = value
@@ -107,7 +102,7 @@ class HashmapValue(Value):
 
     def valueAt(self, interpreter, key):
         return self.value[interpreter.eval_expression(key).value]
-    
+
     def replaceAt(self, key, value):
         if (isinstance(key, StringValue)):
             self.value[key.value] = value
@@ -130,22 +125,22 @@ class BooleanValue(Value):
 
     def __eq__(self, other):
         return self.value == other.value
-    
+
     def __hash__(self):
         return hash(self.value)
 
 class NumberValue(Value):
     def __init__(self, value):
         super().__init__(NumberType())
-        
+
         self.value = value
 
     def __repr__(self):
         return str(self.value)
-    
+
     def __eq__(self, other):
         return self.value == other.value
-    
+
     def __hash__(self):
         return hash(self.value)
 
@@ -157,10 +152,10 @@ class StringValue(Value):
 
     def __repr__(self):
         return f"\"{self.value}\""
-    
+
     def __eq__(self, other):
         return self.value == other.value
-    
+
     def __hash__(self):
         return hash(self.value)
 
@@ -175,20 +170,20 @@ class EmptyValue(Value):
 
     def __eq__(self, other):
         return self.value == other.value
-    
+
     def __hash__(self):
         return hash(self.value)
 
 if (__name__ == "__main__"):
-    # x = HashmapValue({ 
+    # x = HashmapValue({
     #         "a" : ListValue([ NumberValue(123), NumberValue(999) ]),
-    #         "b" : ListValue([ HashmapValue({ "a": NumberValue(123), "b": NumberValue(999) }) ]) 
+    #         "b" : ListValue([ HashmapValue({ "a": NumberValue(123), "b": NumberValue(999) }) ])
     #     })
 
-    x = ListValue([
-        ListValue([ ListValue([ StringValue(123), StringValue(999) ]) ]),
-        ListValue([ ListValue([ StringValue("abc"), NumberValue(111) ]) ])
-    ])
+    # x = ListValue([
+    #     ListValue([ ListValue([ NumberValue(123), NumberValue(999) ]) ]),
+    #     ListValue([ ListValue([ StringValue(888), NumberValue(111) ]) ])
+    # ])
 
     # x = ListValue([
     #     HashmapValue({ "a": NumberValue(123), "b": NumberValue(999) }),
@@ -199,4 +194,5 @@ if (__name__ == "__main__"):
     #     NumberValue(123), NumberValue(999)
     # ], { "return 123" }, {})
 
-    print(x.type)
+    # print(x.type)
+    pass

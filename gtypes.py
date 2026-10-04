@@ -3,8 +3,8 @@ class Type:
         self.typeName = typeName
 
     def is_assignable(self, other):
-        return (self == other 
-            or isinstance(other, EmptyType) 
+        return (self == other
+            or isinstance(other, EmptyType)
             or isinstance(other, AnyType))
 
     def __hash__(self):
@@ -42,13 +42,10 @@ class ListType(Type):
         if (isinstance(self, ListType) and isinstance(other, ListType)):
             return self.type.is_assignable(other.type)
         else:
-            if (isinstance(other, (EmptyType, AnyType))):
-                return True
+            return (isinstance(other, (EmptyType, AnyType)))
 
-            return False
-            
     def __eq__(self, other):
-        return isinstance(other, ListType) and (self.type == other.type)    
+        return isinstance(other, ListType) and (self.type == other.type)
 
     def __hash__(self):
         return hash(self.typeName)
@@ -64,10 +61,7 @@ class HashmapType(Type):
         if (isinstance(self, HashmapType) and isinstance(other, HashmapType)):
             return self.type.is_assignable(other.type)
         else:
-            if (isinstance(other, (EmptyType, AnyType))):
-                return True
-
-            return False
+            return (isinstance(other, (EmptyType, AnyType)))
 
     def __eq__(self, other):
         return isinstance(other, HashmapType) and (self.type == other.type)
@@ -113,13 +107,10 @@ class FunctionType(Type):
 
             return act_result
         else:
-            if (isinstance(other, (EmptyType, AnyType))):
-                return True
-
-            return False
+            return (isinstance(other, (EmptyType, AnyType)))
 
     def __eq__(self, other):
-        return (isinstance(other, FunctionType) 
+        return (isinstance(other, FunctionType)
             and self.param_types == other.param_types
             and self.return_type == other.return_type)
 
@@ -132,18 +123,18 @@ class AnyType(Type):
 
 
 def unify_types(types):
-    if not types:
+    if (not types):
         return AnyType()
 
     first = types[0]
 
-    if all(t == first for t in types):
+    if (all(t == first for t in types)):
         return first
 
-    if all(isinstance(t, ListType) for t in types):
+    if (all(isinstance(t, ListType) for t in types)):
         return ListType(unify_types([t.type for t in types]))
 
-    if all(isinstance(t, HashmapType) for t in types):
+    if (all(isinstance(t, HashmapType) for t in types)):
         return HashmapType(unify_types([t.type for t in types]))
 
     return AnyType()
