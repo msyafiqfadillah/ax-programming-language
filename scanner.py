@@ -1,6 +1,6 @@
 import re
 from tokens.keywords import Keywords
-from tokens.punctuations import Punctuations 
+from tokens.punctuations import Punctuations
 from tokens.operators import Operators
 
 
@@ -20,7 +20,7 @@ class Scanner:
     def peek(self):
         if (self.is_eof()):
             return None
-        
+
         return self.raw_source[self.c_index]
 
     def advance(self):
@@ -29,7 +29,7 @@ class Scanner:
         self.c_index += 1
 
         return c_char
-    
+
     def stream_scan(self, first_char, allowed):
         result = first_char
 
@@ -37,7 +37,7 @@ class Scanner:
             result += self.advance()
 
         return result
-    
+
     def string_scan(self, quote):
         result = ""
 
@@ -79,18 +79,18 @@ class Scanner:
             # OPERATOR
             if (c_char == Operators.EQUAL):
                 if (self.peek() == Operators.EQUAL):
-                    self.add_token("OPERATOR", Operators.D_EQUAL)
+                    self.add_token("OPERATOR", Operators.E_EQUAL)
                     self.advance()
                     continue
 
                 self.add_token("OPERATOR", Operators.EQUAL)
-            
+
             elif (c_char == Operators.NEGATION):
                 if (self.peek() == Operators.EQUAL):
                     self.add_token("OPERATOR", Operators.N_EQUAL)
                     self.advance()
                     continue
-                
+
                 self.add_token("OPERATOR", Operators.NEGATION)
 
             elif (c_char == Operators.GREATER):
@@ -98,7 +98,7 @@ class Scanner:
                     self.add_token("OPERATOR", Operators.G_EQUAL)
                     self.advance()
                     continue
-                
+
                 self.add_token("OPERATOR", Operators.GREATER)
 
             elif (c_char == Operators.LESS):
@@ -106,15 +106,15 @@ class Scanner:
                     self.add_token("OPERATOR", Operators.L_EQUAL)
                     self.advance()
                     continue
-                
+
                 self.add_token("OPERATOR", Operators.LESS)
-            
+
             elif (c_char == Operators.ADDITION):
                 if (self.peek() == Operators.EQUAL):
                     self.add_token("OPERATOR", Operators.A_EQUAL)
                     self.advance()
                     continue
-                
+
                 self.add_token("OPERATOR", Operators.ADDITION)
 
             elif (c_char == Operators.SUBTRACTION):
@@ -122,7 +122,7 @@ class Scanner:
                     self.add_token("OPERATOR", Operators.S_EQUAL)
                     self.advance()
                     continue
-                
+
                 self.add_token("OPERATOR", Operators.SUBTRACTION)
 
             elif (c_char == Operators.MULTIPLICATION):
@@ -130,15 +130,15 @@ class Scanner:
                     self.add_token("OPERATOR", Operators.M_EQUAL)
                     self.advance()
                     continue
-                
+
                 self.add_token("OPERATOR", Operators.MULTIPLICATION)
-            
+
             elif (c_char == Operators.DIVISION):
                 if (self.peek() == Operators.EQUAL):
                     self.add_token("OPERATOR", Operators.D_EQUAL)
                     self.advance()
                     continue
-                
+
                 self.add_token("OPERATOR", Operators.DIVISION)
 
             elif (c_char == Operators.MODULO):
@@ -146,9 +146,9 @@ class Scanner:
                     self.add_token("OPERATOR", Operators.MO_EQUAL)
                     self.advance()
                     continue
-                
+
                 self.add_token("OPERATOR", Operators.MODULO)
-            
+
             elif (c_char == Operators.POWER):
                 self.add_token("OPERATOR", Operators.POWER)
 
