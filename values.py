@@ -75,7 +75,10 @@ class ListValue(Value):
 
     def replaceAt(self, index, value):
         if (isinstance(index, NumberValue)):
-            self.value[index.value] = value
+            if (self.type.type.is_assignable(value.type)):
+                self.value[index.value] = value
+            else:
+                raise RuntimeError(f"Cannot assign {value.type} to {self.value[index.value].type}")
 
     def slice(self, interpreter, start, end):
         if (isinstance(start, NumberValue) and isinstance(end, NumberValue)):
@@ -105,9 +108,10 @@ class HashmapValue(Value):
 
     def replaceAt(self, key, value):
         if (isinstance(key, StringValue)):
-            self.value[key.value] = value
-
-        return None
+            if (self.type.type.is_assignable(value.type)):
+                self.value[key.value] = value
+            else:
+                raise RuntimeError(f"Cannot assign {value.type} to {self.value[key.value].type}")
 
     def __repr__(self):
         rep = "{ " + f"{", ".join([f"{key} : {value}" for key, value in self.value.items()])}" + " }"

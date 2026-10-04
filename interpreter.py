@@ -300,11 +300,17 @@ class Interpreter:
 
         raise TypeError(f"Unknown expression type: {expr}")
 
+def push(list_value, *args):
+    for arg in args:
+        if (list_value.type.type.is_assignable(arg.type)):
+            list_value.push(arg)
+        else:
+            raise RuntimeError(f"Cannot push {arg.type} to {list_value.type}")
 
 global_env = Environment({
     "show": BuiltinValue(lambda *args : print(*args)),
     "length": BuiltinValue(lambda arg : len(arg.value)),
-    "push": BuiltinValue(lambda list_value, *args : list(map(list_value.push, args)))
+    "push": BuiltinValue(push)
 })
 
 
@@ -438,10 +444,9 @@ def main():
     # '''
 
     sample = '''
-        var x = empty
+        var x = [1, 2, 3]
 
-        set x = "abc"
-        set x = 999
+        set x[0] = "999"
 
         show(x)
     '''
