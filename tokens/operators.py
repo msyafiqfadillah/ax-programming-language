@@ -2,7 +2,7 @@ class Operators:
     EQUAL = "="
     G_EQUAL = ">="
     L_EQUAL = "<="
-    D_EQUAL = "=="
+    E_EQUAL = "=="
     N_EQUAL = "!="
     A_EQUAL = "+="
     M_EQUAL = "*="
@@ -28,7 +28,7 @@ class Operators:
             cls.EQUAL,
             cls.G_EQUAL,
             cls.L_EQUAL,
-            cls.D_EQUAL,
+            cls.E_EQUAL,
             cls.N_EQUAL,
             cls.A_EQUAL,
             cls.M_EQUAL,
@@ -48,4 +48,3 @@ class Operators:
             cls.OR,
             cls.AND
         }
-
