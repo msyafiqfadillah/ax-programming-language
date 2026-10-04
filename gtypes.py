@@ -32,6 +32,9 @@ class EmptyType(Type):
     def __init__(self):
         super().__init__("empty")
 
+    def is_assignable(self, other):
+        return isinstance(other, Type)
+
 class ListType(Type):
     def __init__(self, type):
         super().__init__(f"list[{type}]")

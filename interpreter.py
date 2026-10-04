@@ -438,9 +438,10 @@ def main():
     # '''
 
     sample = '''
-        var x = 10
+        var x = empty
 
         set x = "abc"
+        set x = 999
 
         show(x)
     '''
