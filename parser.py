@@ -1,8 +1,12 @@
+import re
+
 import helper
 import nodes
+import gtypes
 from tokens.keywords import Keywords
 from tokens.punctuations import Punctuations
 from tokens.operators import Operators
+from tokens.types import Types
 
 
 class Parser:
@@ -63,19 +67,20 @@ class Parser:
             return self.parse_continue()
         elif (current_token["value"] == Keywords.BREAK):
             return self.parse_break()
-        # elif (current_token["type"] == "IDENTIFIER" or current_token["type"] == "NUMBER"):
+        elif (current_token["value"] in Types.all()):
+            return self.parse_type()
         else:
             return self.parse_expression()
-
-        # raise TypeError(f"Unknown statement starting with {self.peek()["value"]}")
 
     def parse_var(self):
         self.match(Keywords.VAR, "value")
         identifier = self.match("IDENTIFIER", "type")
+        self.match(Punctuations.COLON, "value")
+        type = self.parse_type()
         self.match(Operators.EQUAL, "value")
         expression = self.parse_expression()
 
-        return nodes.VariableDeclaration(declaration=nodes.VariableDeclarator(id=nodes.Identifier(name=identifier["value"]), init=expression))
+        return nodes.VariableDeclaration(declaration=nodes.VariableDeclarator(id=nodes.Identifier(name=identifier["value"]), init=expression, type=type))
 
     def parse_set(self):
         self.match(Keywords.SET, "value")
@@ -91,9 +96,16 @@ class Parser:
         self.match(Punctuations.PARANTHESSES_O, "value")
         params = self.parse_params()
         self.match(Punctuations.PARANTHESSES_C, "value")
+        self.match(Punctuations.COLON, "value")
+        type = self.parse_type()
         body = self.parse_block()
 
-        return nodes.FunctionDeclaration(nodes.Identifier(identifier["value"]), params, body)
+        return nodes.FunctionDeclaration(
+            nodes.Identifier(identifier["value"]),
+            params,
+            body,
+            type
+        )
 
     def parse_if(self):
         self.match(Keywords.IF, "value")
@@ -153,8 +165,12 @@ class Parser:
 
         while (not helper.is_eof(self.index, self.tokens) and self.peek()["type"] == "IDENTIFIER"):
             param = self.match("IDENTIFIER", "type")["value"]
+            self.match(Punctuations.COLON, "value")
+            type = self.parse_type()
 
-            params.append(nodes.Identifier(param))
+            temp_node = { "name": nodes.Identifier(param), "type": type }
+
+            params.append(temp_node)
 
             if (self.peek()["value"] != Punctuations.PARANTHESSES_C):
                 self.match(Punctuations.COMMA, "value")
@@ -353,9 +369,11 @@ class Parser:
         self.match(Punctuations.PARANTHESSES_O, "value")
         params = self.parse_params()
         self.match(Punctuations.PARANTHESSES_C, "value")
+        self.match(Punctuations.COLON, "value")
+        type = self.parse_type()
         body = self.parse_block()
 
-        return nodes.FunctionExpression(params, body)
+        return nodes.FunctionExpression(params, body, type)
 
     def parse_list(self):
         expr_lst = []
@@ -446,17 +464,70 @@ class Parser:
 
         return nodes.BreakStatement()
 
+    def parse_type(self):
+        token = self.match("TYPE", "type")
+        value = token["value"]
+
+        match value:
+            case "number":
+                return gtypes.NumberType()
+            case "string":
+                return gtypes.StringType()
+            case "boolean":
+                return gtypes.BooleanType()
+            case "empty":
+                return gtypes.EmptyType()
+            case "any":
+                return gtypes.AnyType()
+            case "list":
+                self.match(Punctuations.SQUARE_O, "value")
+                inner_type = self.parse_type()
+                self.match(Punctuations.SQUARE_C, "value")
+
+                return gtypes.ListType(inner_type)
+            case "hashmap":
+                self.match(Punctuations.SQUARE_O, "value")
+                inner_type = self.parse_type()
+                self.match(Punctuations.SQUARE_C, "value")
+
+                return gtypes.HashmapType(inner_type)
+            case _:
+                raise TypeError(f"Unknown type: {value}")
+
 def main():
     parser = Parser()
 
     sample = [
-        {"type": "KEYWORDS", "value": "var"},
-        {"type": "IDENTIFIER", "value": "x"},
-        {"type": "OPERATOR", "value": "="},
-        {"type": "OPERATOR", "value": "-"},
-        {"type": "NUMBER", "value": "6"},
-        {"type": "OPERATOR", "value": "<"},
-        {"type": "NUMBER", "value": "2"},
+        {'type': 'KEYWORDS', 'value': 'var'},
+        {'type': 'IDENTIFIER', 'value': 'x'},
+        {'type': 'PUNCTUATIONS', 'value': ':'},
+        {'type': 'TYPE', 'value': 'number'},
+        {'type': 'OPERATOR', 'value': '='},
+        {'type': 'KEYWORDS', 'value': 'prc'},
+        {'type': 'PUNCTUATIONS', 'value': '('},
+        {'type': 'IDENTIFIER', 'value': 'p1'},
+        {'type': 'PUNCTUATIONS', 'value': ':'},
+        {'type': 'TYPE', 'value': 'number'},
+        {'type': 'PUNCTUATIONS', 'value': ','},
+        {'type': 'IDENTIFIER', 'value': 'p2'},
+        {'type': 'PUNCTUATIONS', 'value': ':'},
+        {'type': 'TYPE', 'value': 'string'},
+        {'type': 'PUNCTUATIONS', 'value': ')'},
+        {'type': 'PUNCTUATIONS', 'value': ':'},
+        {'type': 'TYPE', 'value': 'list'},
+        {'type': 'PUNCTUATIONS', 'value': '['},
+        {'type': 'TYPE', 'value': 'any'},
+        {'type': 'PUNCTUATIONS', 'value': ']'},
+        {'type': 'PUNCTUATIONS', 'value': '{'},
+        {'type': 'KEYWORDS', 'value': 'return'},
+        {'type': 'PUNCTUATIONS', 'value': '['},
+        {'type': 'IDENTIFIER', 'value': 'p1'},
+        {'type': 'PUNCTUATIONS', 'value': ','},
+        {'type': 'IDENTIFIER', 'value': 'p2'},
+        {'type': 'PUNCTUATIONS', 'value': ']'},
+        {'type': 'PUNCTUATIONS', 'value': '}'},
+        {'type': 'PUNCTUATIONS', 'value': '('},
+        {'type': 'PUNCTUATIONS', 'value': ')'}
     ]
 
     for token in parser.parse_program(sample).body:

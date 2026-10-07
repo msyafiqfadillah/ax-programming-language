@@ -10,7 +10,7 @@ class VariableDeclaration:
         self.declaration = declaration
 
     def __repr__(self):
-        return f"var {self.declaration.id} = {self.declaration.init}"
+        return f"var {self.declaration.id}: {self.declaration.type} = {self.declaration.init}"
 
 class VariableAssignment:
     def __init__(self, operator, declaration):
@@ -21,12 +21,13 @@ class VariableAssignment:
         return f"set {self.declaration.id} {self.operator} {self.declaration.init}"
 
 class VariableDeclarator:
-    def __init__(self, id, init):
+    def __init__(self, id, init, type):
         self.id = id
         self.init = init
+        self.type = type
 
     def __repr__(self):
-        return f"{self.id.name} = {self.init}"
+        return f"{self.id.name}: {self.type} = {self.init}"
 
 class BinaryExpression:
     def __init__(self, left, operator, right):
@@ -51,7 +52,7 @@ class Literal:
 
     def __repr__(self):
         return str(self.value)
-    
+
 class GroupedExpression:
     def __init__(self, opening, expr, closing):
         self.opening = opening
@@ -60,18 +61,19 @@ class GroupedExpression:
 
     def __repr__(self):
         return f"{self.opening} {self.expr} {self.closing}"
-    
+
 class FunctionDeclaration:
-    def __init__(self, name, params, body):
+    def __init__(self, name, params, body, return_type):
         self.name = name
         self.params = params
         self.body = body
+        self.return_type = return_type
 
     def __repr__(self):
-        params = ", ".join(repr(s) for s in self.params)
+        params = ", ".join(f"{repr(s["name"])}: {s["type"]}" for s in self.params)
 
-        return f"prc {self.name}({params}) {self.body}"
-    
+        return f"prc {self.name}({params}): {self.return_type} {self.body}"
+
 class CallExpression:
     def __init__(self, callee, arguments):
         self.callee = callee
@@ -79,45 +81,45 @@ class CallExpression:
 
     def __repr__(self):
         args = ", ".join(repr(s) for s in self.arguments)
-        
+
         return f"{self.callee}({args})"
-    
+
 class BlockStatement:
     def __init__(self, body):
         self.body = body
 
     def __repr__(self):
         return "{ " + " ".join(repr(s) for s in self.body) + " }"
-    
+
 class ReturnStatement:
     def __init__(self, argument):
         self.argument = argument
 
     def __repr__(self):
         return f"return {self.argument}"
-    
+
 class ListExpression:
     def __init__(self, value):
         self.value = value
 
     def __repr__(self):
         return f"[ {", ".join(repr(s) for s in self.value)} ]"
-    
+
 class HashmapExpression:
     def __init__(self, value):
-        self.value = value 
-    
+        self.value = value
+
     def __repr__(self):
         return "{" + f", ".join([f"{key} : {value}" for key, value in self.value.items()]) + "}"
-    
+
 class UnaryExpression:
     def __init__(self, operator, value):
         self.operator = operator
-        self.value = value 
-    
+        self.value = value
+
     def __repr__(self):
         return f"{self.operator}{self.value}"
-    
+
 class PostfixExpression:
     def __init__(self, exp, start_exp, end_exp=None):
         self.exp = exp
@@ -126,7 +128,7 @@ class PostfixExpression:
 
     def __repr__(self):
         return f"{self.exp}[{self.start_exp}{f":{self.end_exp}" if self.end_exp is not None else ""}]"
-    
+
 class IfStatement:
     def __init__(self, condition, body, alternate):
         self.condition = condition
@@ -159,11 +161,12 @@ class BreakStatement:
         return "break"
 
 class FunctionExpression:
-    def __init__(self, params, body):
+    def __init__(self, params, body, return_type):
         self.params = params
         self.body = body
+        self.return_type = return_type
 
     def __repr__(self):
-        params = ", ".join(repr(s) for s in self.params)
+        params = ", ".join(f"{repr(s["name"])}: {s["type"]}" for s in self.params)
 
-        return f"prc ({params}) {self.body}"
+        return f"prc ({params}): {self.return_type} {self.body}"

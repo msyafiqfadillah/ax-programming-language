@@ -2,6 +2,7 @@ import re
 from tokens.keywords import Keywords
 from tokens.punctuations import Punctuations
 from tokens.operators import Operators
+from tokens.types import Types
 
 
 class Scanner:
@@ -175,6 +176,8 @@ class Scanner:
 
                 if (rs in Keywords.all()): # KEYWORDS
                     self.add_token("KEYWORDS", rs)
+                elif (rs in Types.all()):
+                    self.add_token("TYPE", rs)
                 else:                      # IDENTIFIER
                     self.add_token("IDENTIFIER", rs)
 
@@ -202,8 +205,9 @@ def main() :
     # '''
 
     sample = '''
-        var x = 2 * 2 ^ 2
-        var z = 2 < 9
+        var x: number = prc (p1: number, p2: string): list[any] {
+            return [p1, p2]
+        }()
     '''
 
     tokens = scanner.scans(sample)
