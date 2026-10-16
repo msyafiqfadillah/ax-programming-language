@@ -76,7 +76,7 @@ class FunctionType(Type):
     def __init__(self, param_types, return_type):
         params = ", ".join([str(t) for t in param_types])
 
-        super().__init__(f"prc({params}) -> {return_type}")
+        super().__init__(f"func({params}) -> {return_type}")
 
         self.param_types = param_types
         self.return_type = return_type
