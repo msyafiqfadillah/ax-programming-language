@@ -4,6 +4,7 @@ from gtypes import (
         BooleanType, AnyType, unify_types
 )
 from environment import Environment
+from exceptions import *
 
 class Value:
     def __init__(self, type):
@@ -37,12 +38,14 @@ class FunctionValue(Value):
         current_loop_state = interpreter.loop_depth
 
         for param, arg in zip(self.params, args):
-            local_env.define(param.name, arg)
+            local_env.define(param["name"].name, arg)
 
         interpreter.loop_depth = 0
 
         try:
             result = interpreter.eval_block(self.body, local_env)
+        except ReturnException as ren:
+            return ren.value
         finally:
             interpreter.loop_depth = current_loop_state
 
@@ -54,7 +57,7 @@ class FunctionValue(Value):
         return result
 
     def __repr__(self):
-        params = ", ".join([param.name for param in self.params])
+        params = ", ".join([param["name"].name for param in self.params])
         return f"prc ({params}) {self.body}"
 
 class BuiltinValue:
