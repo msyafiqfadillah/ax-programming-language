@@ -6,11 +6,12 @@ class Program:
         return f"{self.body}"
 
 class VariableDeclaration:
-    def __init__(self, declaration):
+    def __init__(self, declaration, type):
         self.declaration = declaration
+        self.type = type
 
     def __repr__(self):
-        return f"var {self.declaration.id}: {self.declaration.type} = {self.declaration.init}"
+        return f"var {self.declaration.id}: {self.type} = {self.declaration.init}"
 
 class VariableAssignment:
     def __init__(self, operator, declaration):
@@ -21,13 +22,12 @@ class VariableAssignment:
         return f"set {self.declaration.id} {self.operator} {self.declaration.init}"
 
 class VariableDeclarator:
-    def __init__(self, id, init, type):
+    def __init__(self, id, init):
         self.id = id
         self.init = init
-        self.type = type
 
     def __repr__(self):
-        return f"{self.id.name}: {self.type} = {self.init}"
+        return f"{self.id.name} = {self.init}"
 
 class BinaryExpression:
     def __init__(self, left, operator, right):
