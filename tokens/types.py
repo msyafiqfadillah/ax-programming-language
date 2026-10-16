@@ -6,6 +6,7 @@ class Types:
     LIST = "list"
     HASHMAP = "hashmap"
     ANY = "any"
+    FUNC = "func"
 
     @classmethod
     def all(cls):
@@ -17,4 +18,5 @@ class Types:
             cls.LIST,
             cls.HASHMAP,
             cls.ANY,
+            cls.FUNC
         ]
