@@ -469,28 +469,42 @@ class Parser:
         value = token["value"]
 
         match value:
-            case "number":
+            case Types.NUMBER:
                 return gtypes.NumberType()
-            case "string":
+            case Types.STRING:
                 return gtypes.StringType()
-            case "boolean":
+            case Types.BOOLEAN:
                 return gtypes.BooleanType()
-            case "empty":
+            case Types.EMPTY:
                 return gtypes.EmptyType()
-            case "any":
+            case Types.ANY:
                 return gtypes.AnyType()
-            case "list":
+            case Types.LIST:
                 self.match(Punctuations.SQUARE_O, "value")
                 inner_type = self.parse_type()
                 self.match(Punctuations.SQUARE_C, "value")
 
                 return gtypes.ListType(inner_type)
-            case "hashmap":
+            case Types.HASHMAP:
                 self.match(Punctuations.SQUARE_O, "value")
                 inner_type = self.parse_type()
                 self.match(Punctuations.SQUARE_C, "value")
 
                 return gtypes.HashmapType(inner_type)
+            case Types.FUNC:
+                self.match(Punctuations.PARANTHESSES_O, "value")
+
+                params_type = []
+                while (not helper.is_eof(self.index, self.tokens) and self.peek()["value"] != Punctuations.PARANTHESSES_C):
+                    typ = self.parse_type()
+                    params_type.append(typ)
+
+                self.match(Punctuations.PARANTHESSES_C, "value")
+                self.match(Operators.SUBTRACTION, "value")
+                self.match(Operators.GREATER, "value")
+                return_type = self.parse_type()
+
+                return gtypes.FunctionType(params_type, return_type)
             case _:
                 raise TypeError(f"Unknown type: {value}")
 
