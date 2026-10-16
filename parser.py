@@ -80,7 +80,7 @@ class Parser:
         self.match(Operators.EQUAL, "value")
         expression = self.parse_expression()
 
-        return nodes.VariableDeclaration(declaration=nodes.VariableDeclarator(id=nodes.Identifier(name=identifier["value"]), init=expression, type=type))
+        return nodes.VariableDeclaration(declaration=nodes.VariableDeclarator(id=nodes.Identifier(name=identifier["value"]), init=expression), type=type)
 
     def parse_set(self):
         self.match(Keywords.SET, "value")
