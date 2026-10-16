@@ -1,44 +1,26 @@
-import nodes
-
+from nodes import *
 from tokens.operators import Operators
 from environment import Environment
-from scanner import Scanner
-from parser import Parser
 from values import (
     StringValue, NumberValue, EmptyValue,
     ListValue, HashmapValue, BuiltinValue,
     FunctionValue, BooleanValue
 )
-
-
-class ReturnException(Exception):
-    def __init__(self):
-        pass
-
-class ContinueException(Exception):
-    def __init__(self):
-        pass
-
-class BreakException(Exception):
-    def __init__(self):
-        pass
+from exceptions import *
 
 class Interpreter:
     def __init__(self):
         self.env = global_env
         self.loop_depth = 0
 
-    def run(self, source):
-        tokens = Scanner().scans(source)
-        ast = Parser().parse_program(tokens)
-
+    def run(self, ast):
         for stmt in ast.body:
             self.eval_statement(stmt)
 
         return self.env.record
 
     def resolve_assignment(self, node):
-        if (isinstance(node, nodes.Identifier)):
+        if (isinstance(node, Identifier)):
             name = node.name
 
             if (self.env.resolve(name)):
@@ -46,7 +28,7 @@ class Interpreter:
             else:
                 raise NameError(f"Variable {name} is not defined")
 
-        if (isinstance(node, nodes.PostfixExpression)):
+        if (isinstance(node, PostfixExpression)):
             container, key = self.resolve_assignment(node.exp)
 
             if (container == "env"):
@@ -68,15 +50,11 @@ class Interpreter:
         try:
             for stmt in stmts.body:
                 self.eval_statement(stmt)
-
-            return None
-        except ReturnException:
-            return self.eval_expression(stmt.argument)
         finally:
             self.env = parent_env
 
     def eval_statement(self, stmt):
-        if (isinstance(stmt, nodes.VariableDeclaration)):
+        if (isinstance(stmt, VariableDeclaration)):
             name = stmt.declaration.id.name
             value = self.eval_expression(stmt.declaration.init)
 
@@ -86,7 +64,7 @@ class Interpreter:
             self.env.define(name, value)
 
             return value
-        elif (isinstance(stmt, nodes.VariableAssignment)):
+        elif (isinstance(stmt, VariableAssignment)):
             id = stmt.declaration.id
             container, key = self.resolve_assignment(id)
             value = self.eval_expression(stmt.declaration.init)
@@ -121,28 +99,30 @@ class Interpreter:
                 container.replaceAt(key, value)
 
             return value
-        elif (isinstance(stmt, nodes.FunctionDeclaration)):
+        elif (isinstance(stmt, FunctionDeclaration)):
             name = stmt.name.name
             func = FunctionValue(stmt.params, stmt.body, self.env)
             self.env.define(name, func)
 
             return func
-        elif (isinstance(stmt, nodes.ReturnStatement)):
+        elif (isinstance(stmt, ReturnStatement)):
             if (self.env.parent is not None):
-                raise ReturnException()
+                expr = self.eval_expression(stmt.argument)
+
+                raise ReturnException(expr)
             else:
                 raise RuntimeError("Cannot use return outside block")
-        elif (isinstance(stmt, nodes.IfStatement)):
+        elif (isinstance(stmt, IfStatement)):
             if ((stmt.condition is None) or (self.eval_expression(stmt.condition).value)):
                 local_env = Environment({}, self.env)
 
                 self.eval_block(stmt.body, local_env)
             else:
-                if (isinstance(stmt.alternate, nodes.IfStatement)):
+                if (isinstance(stmt.alternate, IfStatement)):
                     self.eval_statement(stmt.alternate)
 
             return
-        elif (isinstance(stmt, nodes.LoopStatement)):
+        elif (isinstance(stmt, LoopStatement)):
             self.loop_depth += 1
 
             try:
@@ -159,12 +139,12 @@ class Interpreter:
                 self.loop_depth -= 1
 
             return
-        elif (isinstance(stmt, nodes.ContinueStatement)):
+        elif (isinstance(stmt, ContinueStatement)):
             if (self.loop_depth == 0):
                 raise RuntimeError("Cannot use continue outside loop statement")
 
             raise ContinueException()
-        elif (isinstance(stmt, nodes.BreakStatement)):
+        elif (isinstance(stmt, BreakStatement)):
             if (self.loop_depth == 0):
                 raise RuntimeError("Cannot use break outisde loop statement")
 
@@ -174,7 +154,7 @@ class Interpreter:
         return self.eval_expression(stmt)
 
     def eval_expression(self, expr):
-        if (isinstance(expr, nodes.Literal)):
+        if (isinstance(expr, Literal)):
             value = expr.value
             type_value = expr.type
 
@@ -188,16 +168,16 @@ class Interpreter:
                 case "EMPTY":
                     return EmptyValue()
 
-        if (isinstance(expr, nodes.Identifier)):
+        if (isinstance(expr, Identifier)):
             _, key = self.resolve_assignment(expr)
             value = self.env.lookup(key)
 
             return self.eval_expression(value)
 
-        if (isinstance(expr, nodes.GroupedExpression)):
+        if (isinstance(expr, GroupedExpression)):
             return self.eval_expression(expr.expr)
 
-        if (isinstance(expr, nodes.BinaryExpression)):
+        if (isinstance(expr, BinaryExpression)):
             left = self.eval_expression(expr.left)
             right = self.eval_expression(expr.right)
             op = expr.operator
@@ -247,7 +227,7 @@ class Interpreter:
 
             raise TypeError(f"Operation with '{op}' is invalid between {type(left).__name__} and {type(right).__name__}")
 
-        if (isinstance(expr, nodes.UnaryExpression)):
+        if (isinstance(expr, UnaryExpression)):
             op = expr.operator
             right = self.eval_expression(expr.value)
 
@@ -260,8 +240,8 @@ class Interpreter:
             elif (op == "!"):
                 return BooleanValue(not right.value)
 
-        if (isinstance(expr, nodes.CallExpression)):
-            if (isinstance(expr.callee, nodes.CallExpression)):
+        if (isinstance(expr, CallExpression)):
+            if (isinstance(expr.callee, CallExpression)):
                 result = self.eval_expression(expr.callee)
             else:
                 result = self.env.lookup(expr.callee.name)
@@ -270,18 +250,18 @@ class Interpreter:
 
             return result
 
-        if (isinstance(expr, nodes.FunctionExpression)):
+        if (isinstance(expr, FunctionExpression)):
             func = FunctionValue(expr.params, expr.body, self.env)
 
             return func
 
-        if (isinstance(expr, nodes.ListExpression)):
+        if (isinstance(expr, ListExpression)):
             return ListValue([self.eval_expression(e) for e in expr.value])
 
-        if (isinstance(expr, nodes.HashmapExpression)):
+        if (isinstance(expr, HashmapExpression)):
             return HashmapValue({self.eval_expression(key).value : self.eval_expression(value) for key, value in expr.value.items()})
 
-        if (isinstance(expr, nodes.PostfixExpression)):
+        if (isinstance(expr, PostfixExpression)):
             eval_expr = self.eval_expression(expr.exp)
             start_exp = self.eval_expression(expr.start_exp)
 
