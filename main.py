@@ -24,6 +24,7 @@ source = """
     }
 
     show(hxh("gon", 123))
+    show(type(hxh))
 """
 
 main(source)

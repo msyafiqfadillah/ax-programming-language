@@ -41,20 +41,21 @@ class FunctionValue(Value):
             local_env.define(param["name"].name, arg)
 
         interpreter.loop_depth = 0
+        result = None
 
         try:
-            result = interpreter.eval_block(self.body, local_env)
+            interpreter.eval_block(self.body, local_env)
         except ReturnException as ren:
-            return ren.value
+            result = ren.value
+
+            return result
         finally:
+            if (result is not None):
+                self.type = FunctionType([arg.type for arg in args], result.type)
+            else:
+                self.type = FunctionType([arg.type for arg in args], EmptyType())
+
             interpreter.loop_depth = current_loop_state
-
-        if (result is not None):
-            self.type = FunctionType([arg.type for arg in args], result.type)
-        else:
-            self.type = FunctionType([arg.type for arg in args], EmptyType())
-
-        return result
 
     def __repr__(self):
         params = ", ".join([param["name"].name for param in self.params])
