@@ -14,6 +14,16 @@ source = """
     var ggg: func(number) -> number = prc(z: number): number {
         return 1 + 2
     }
+
+    prc hxh(name: string, age: number): any {
+        if (name == "gon") {
+            return name
+        } whatever {
+            return age
+        }
+    }
+
+    show(hxh("gon", 123))
 """
 
 main(source)

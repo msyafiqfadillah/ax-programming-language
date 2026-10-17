@@ -44,7 +44,10 @@ class TypeChecker:
             type = stmt.type
             value_type = self.check_expression(stmt.declaration.init)
 
-            self.assign_or(name, type, value_type)
+            if ((type != value_type) or (not type.is_assignable(value_type))):
+                raise TypeError(f"{value_type} cannot be assign to {type}")
+            else:
+                self.env.define(name, type)
         elif (isinstance(stmt, VariableAssignment)):
             id = stmt.declaration.id
             id_type = self.resolve_assignment(id)
@@ -52,6 +55,13 @@ class TypeChecker:
 
             if (not id_type.is_assignable(value_type)):
                 raise TypeError(f"{value_type} cannot assign to {id_type}")
+        elif (isinstance(stmt, FunctionDeclaration)):
+            id = stmt.name
+            param_type = [ttp["type"] for ttp in stmt.params]
+            return_type = stmt.return_type
+            fc_type = FunctionType(param_type, return_type)
+
+            self.env.define(id, fc_type)
 
     def check_expression(self, expr):
         if (isinstance(expr, Literal)):
@@ -94,12 +104,6 @@ class TypeChecker:
             r_type = expr.return_type
 
             return FunctionType(ps_type, r_type)
-
-    def assign_or(self, name, type, value_type):
-        if ((type != value_type) or (not type.is_assignable(value_type))):
-            raise TypeError(f"{value_type} cannot be assign to {type}")
-        else:
-            self.env.define(name, type)
 
     def get_base(self, value_type):
         match (value_type):
