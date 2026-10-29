@@ -83,7 +83,13 @@ class TypeChecker:
             if (stmt.alternate is not None):
                 self.check_statement(stmt.alternate)
         elif (isinstance(stmt, LoopStatement)):
-            pass
+            condition_type = self.check_expression(stmt.condition)
+
+            if (not isinstance(condition_type, BooleanType)):
+                raise TypeError("Condition must be a boolean type")
+
+            local_env = Environment({}, self.env)
+            self.check_block(stmt.body, local_env)
 
     def check_expression(self, expr):
         if (isinstance(expr, Literal)):

@@ -11,22 +11,24 @@ def main(source):
     Interpreter().run(ast)
 
 source = """
-    var x: number = 123
-    var y: number = 222
+    var x: boolean = true
+    var inc: number = 0
 
-    if (x == y) {
-        show(222)
-    } maybe (x < y) {
-        if (true) {
-            show(7171)
+    loop (x) {
+        if (inc == 6) {
+            set x = false
+        } maybe (inc == 3) {
+            set inc += 1
+
+            continue
         }
 
-        show(888)
-    } maybe (x != y) {
-        show(999)
-    } whatever {
-        show("abc")
+        show(inc)
+
+        set inc += 1
     }
+
+    show(inc)
 """
 
 main(source)
