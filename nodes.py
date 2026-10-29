@@ -136,7 +136,10 @@ class IfStatement:
         self.alternate = alternate
 
     def __repr__(self):
-        return "IF TEST"
+        if (self.alternate is None):
+            return f"if ({self.condition}) {self.body}"
+        else:
+            return f"if ({self.condition}) {self.body} {self.alternate}"
 
 class LoopStatement:
     def __init__(self, condition, body):

@@ -38,6 +38,16 @@ class TypeChecker:
         else:
             raise TypeError("Invalid assignment target")
 
+    def check_block(self, stmts, local_env):
+        parent_block = self.env
+        self.env = local_env
+
+        try:
+            for stmt in stmts.body:
+                self.check_statement(stmt)
+        finally:
+            self.env = parent_block
+
     def check_statement(self, stmt):
         if (isinstance(stmt, VariableDeclaration)):
             name = stmt.declaration.id.name
@@ -62,6 +72,18 @@ class TypeChecker:
             fc_type = FunctionType(param_type, return_type)
 
             self.env.define(id, fc_type)
+        elif (isinstance(stmt, IfStatement)):
+            if ((stmt.condition is not None)
+                    and not isinstance(self.check_expression(stmt.condition), BooleanType)):
+                raise TypeError("Condition must be a boolean type")
+
+            local_env = Environment({}, self.env)
+            self.check_block(stmt.body, local_env)
+
+            if (stmt.alternate is not None):
+                self.check_statement(stmt.alternate)
+        elif (isinstance(stmt, LoopStatement)):
+            pass
 
     def check_expression(self, expr):
         if (isinstance(expr, Literal)):
@@ -75,16 +97,29 @@ class TypeChecker:
 
         if (isinstance(expr, BinaryExpression)):
             left_type = self.check_expression(expr.left)
+            operator = expr.operator
             right_type = self.check_expression(expr.right)
 
-            if (isinstance(left_type, NumberType) and isinstance(right_type, NumberType)):
+            if (operator in (
+                Operators.E_EQUAL, Operators.G_EQUAL, Operators.N_EQUAL,
+                Operators.L_EQUAL, Operators.POWER, Operators.MODULO,
+                Operators.GREATER, Operators.LESS, Operators.OR, Operators.AND
+            )):
+                return BooleanType()
+            elif (operator in (
+                Operators.A_EQUAL, Operators.M_EQUAL, Operators.S_EQUAL,
+                Operators.D_EQUAL, Operators.P_EQUAL, Operators.MO_EQUAL,
+                Operators.ADDITION, Operators.MULTIPLICATION, Operators.SUBTRACTION,
+                Operators.DIVISION, Operators.POWER, Operators.MODULO
+            ) and (isinstance(left_type, NumberType)
+                    and isinstance(right_type, NumberType))):
                 return NumberType()
 
         if (isinstance(expr, UnaryExpression)):
             return self.check_expression(expr.value)
 
         if (isinstance(expr, ListExpression)):
-            atype = list(set([self.check_expression(item) for item in expr.value]))
+            atype = list({self.check_expression(item) for item in expr.value})
 
             if (len(atype) > 0):
                 return ListType(atype[0])
@@ -92,7 +127,7 @@ class TypeChecker:
                 return ListType(AnyType())
 
         if (isinstance(expr, HashmapExpression)):
-            atype = list(set([self.check_expression(item) for item in expr.value]))
+            atype = list({self.check_expression(item) for item in expr.value})
 
             if (len(atype) > 0):
                 return HashmapType(atype[0])

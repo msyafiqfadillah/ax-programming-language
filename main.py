@@ -11,20 +11,22 @@ def main(source):
     Interpreter().run(ast)
 
 source = """
-    var ggg: func(number) -> number = prc(z: number): number {
-        return 1 + 2
-    }
+    var x: number = 123
+    var y: number = 222
 
-    prc hxh(name: string, age: number): any {
-        if (name == "gon") {
-            return name
-        } whatever {
-            return age
+    if (x == y) {
+        show(222)
+    } maybe (x < y) {
+        if (true) {
+            show(7171)
         }
-    }
 
-    show(hxh("gon", 123))
-    show(type(hxh))
+        show(888)
+    } maybe (x != y) {
+        show(999)
+    } whatever {
+        show("abc")
+    }
 """
 
 main(source)
