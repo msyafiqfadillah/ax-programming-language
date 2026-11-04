@@ -241,12 +241,8 @@ class Interpreter:
                 return BooleanValue(not right.value)
 
         if (isinstance(expr, CallExpression)):
-            if (isinstance(expr.callee, CallExpression)):
-                result = self.eval_expression(expr.callee)
-            else:
-                result = self.env.lookup(expr.callee.name)
-
-            result = result.call(self, [self.eval_expression(arg) for arg in expr.arguments])
+            callee_val = self.eval_expression(expr.callee)
+            result = callee_val.call(self, [self.eval_expression(arg) for arg in expr.arguments])
 
             return result
 
