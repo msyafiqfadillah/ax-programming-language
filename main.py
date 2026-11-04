@@ -11,24 +11,28 @@ def main(source):
     Interpreter().run(ast)
 
 source = """
-    var x: boolean = true
-    var inc: number = 0
-
-    loop (x) {
-        if (inc == 6) {
-            set x = false
-        } maybe (inc == 3) {
-            set inc += 1
-
-            continue
-        }
-
-        show(inc)
-
-        set inc += 1
+    var x: func(number) -> number = prc (h: number): number {
+        return 2+h
     }
+    var z: number = x(99)
+    var funcs: list[func(number) -> number] = [
+        prc(a: number): number { return a * 2 },
+        prc(b: number): number { return b ^ 2 },
+        prc(c: number): number { return c + 30 }
+    ]
+    var fc0: number = funcs[0](3)
 
-    show(inc)
+    # show(fc0)
+
+    var p: list[list[number]] = [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]
+    ]
+    p[0][1]
+
+    var hhh: number = 123
+    hhh[0]
 """
 
 main(source)
