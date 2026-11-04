@@ -271,7 +271,7 @@ class Interpreter:
             elif (isinstance(eval_expr, HashmapValue)):
                 return eval_expr.valueAt(self, start_exp)
 
-        if (isinstance(expr, (FunctionValue, ListValue, HashmapValue, BooleanValue, NumberValue, StringValue, EmptyValue))):
+        if (isinstance(expr, (BuiltinValue, FunctionValue, ListValue, HashmapValue, BooleanValue, NumberValue, StringValue, EmptyValue))):
             return expr
 
         raise TypeError(f"Unknown expression type: {expr}")
