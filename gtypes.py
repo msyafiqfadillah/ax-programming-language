@@ -117,6 +117,9 @@ class FunctionType(Type):
             and self.param_types == other.param_types
             and self.return_type == other.return_type)
 
+    def __hash__(self):
+        return hash(self.typeName)
+
 class AnyType(Type):
     def __init__(self):
         super().__init__("any")
