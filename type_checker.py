@@ -168,6 +168,54 @@ class TypeChecker:
 
             return FunctionType(ps_type, r_type)
 
+        if (isinstance(expr, CallExpression)):
+            callee_type = self.check_expression(expr.callee)
+            callee_name = expr.callee
+
+            if (isinstance(callee_type, FunctionType)):
+                params_len = len(callee_type.param_types)
+                args_len = len(expr.arguments)
+
+                if (args_len == params_len):
+                    for ix, tx in enumerate(expr.arguments):
+                        ct = callee_type.param_types[ix]
+                        tp = self.check_expression(tx)
+
+                        if (not ct.is_assignable(tp)):
+                            raise TypeError(f"Cannot assign {tp} to {ct}")
+                else:
+                    raise TypeError(f"{callee_name} required {params_len} parameters, assign {args_len}")
+
+                return callee_type.return_type
+            else:
+                raise TypeError(f"{callee_name} is not a function")
+
+        if (isinstance(expr, PostfixExpression)):
+            eval_exp = self.check_expression(expr.exp)
+            start_exp = self.check_expression(expr.start_exp)
+
+            if (isinstance(eval_exp, ListType)):
+                if (expr.end_exp is not None):
+                    if (not isinstance(start_exp, NumberType)):
+                        raise TypeError("Start index must be integer")
+
+                    end_exp = self.check_expression(expr.end_exp)
+
+                    if (not isinstance(end_exp, NumberType)):
+                        raise TypeError("End index must be integer")
+
+                    return eval_exp
+                else:
+                    if (not isinstance(start_exp, NumberType)):
+                        raise TypeError("List index must be integer")
+            elif (isinstance(eval_exp, HashmapType)):
+                if (not isinstance(start_exp, StringType)):
+                    raise TypeError("Hashmap key must be string")
+            else:
+                raise TypeError(f"{eval_exp} isn't indexable")
+
+            return eval_exp.type
+
     def get_base(self, value_type):
         match (value_type):
             case "STRING":
