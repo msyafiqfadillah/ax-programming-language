@@ -9,7 +9,6 @@ class Keywords:
     WHATEVER = "whatever"
     TRUE = "true"
     FALSE = "false"
-    EMPTY = "empty"
     UNDEFINED = "undefined"
     CONTINUE = "continue"
     BREAK = "break"
@@ -27,8 +26,8 @@ class Keywords:
             cls.WHATEVER,
             cls.TRUE,
             cls.FALSE,
-            cls.EMPTY,
             cls.UNDEFINED,
             cls.CONTINUE,
-            cls.BREAK
+            cls.BREAK,
+            # cls.VOID
         }
