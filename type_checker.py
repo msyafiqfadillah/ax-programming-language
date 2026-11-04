@@ -67,12 +67,21 @@ class TypeChecker:
             if (not id_type.is_assignable(value_type)):
                 raise TypeError(f"{value_type} cannot assign to {id_type}")
         elif (isinstance(stmt, FunctionDeclaration)):
-            id = stmt.name
-            param_type = [ttp["type"] for ttp in stmt.params]
+            id = stmt.name.name
+            params = { x["name"].name: x["type"] for x in stmt.params }
+            param_type = params.values()
             return_type = stmt.return_type
             fc_type = FunctionType(param_type, return_type)
 
             self.env.define(id, fc_type)
+
+            prev_return_type = self.current_return_type
+            self.current_return_type = return_type
+
+            local_env = Environment(params, self.env)
+            self.check_block(stmt.body, local_env)
+
+            self.current_return_type = prev_return_type
         elif (isinstance(stmt, IfStatement)):
             if ((stmt.condition is not None)
                     and not isinstance(self.check_expression(stmt.condition), BooleanType)):
