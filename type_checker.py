@@ -6,6 +6,7 @@ from tokens.operators import Operators
 class TypeChecker:
     def __init__(self):
         self.env = global_env
+        self.current_return_type = None
 
     def check(self, ast):
         for stmt in ast.body:
@@ -90,6 +91,18 @@ class TypeChecker:
 
             local_env = Environment({}, self.env)
             self.check_block(stmt.body, local_env)
+        elif (isinstance(stmt, ReturnStatement)):
+            # TODO: handle void return type
+
+            if (self.current_return_type is None):
+                raise RuntimeError("Cannot use return outside function")
+
+            actual_type = self.check_expression(stmt.argument)
+
+            if (not self.current_return_type.is_assignable(actual_type)):
+                raise TypeError(f"Cannot return {actual_type} from function expecting {self.current_return_type}")
+        else:
+            self.check_expression(stmt)
 
     def check_expression(self, expr):
         if (isinstance(expr, Literal)):
