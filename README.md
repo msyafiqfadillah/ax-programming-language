@@ -1,32 +1,63 @@
 # ax Programming Language
+## Introduction
+ax is a procedural, statically typed programming language and interpreted developed for educational purposes. It covers some concepts, including: static type, closures, collections (such as list (dynamic array) and hashmap).
 
-this is my first attempt of creating a language.
+## Features
+### Static Type
+in order to declare a name, ax required explicit type writing.
+```
+var param: number = 10
 
-## Hello World
+prc sumOdd(startNum: number): number {
+    var index: number = 0
+    var result: number = 0
 
+    loop (index < startNum) {
+      if (index % 2 != 0) {
+        result += index
+      }
+    
+      index++
+    }
+
+    return result
+}
+
+sumOdd(param)
+```
+
+### Unified Numeric Type
+ax uses a unified numeric type called `number`. Integer and floating-point values are represented by the same language-level type.
+```
+var num1: number = 10
+var num2: number = 89.55
+
+show(num1 + num2)
+```
+
+## Examples
+### Hello World
 ```
 show("Hello, World!")
 ```
 
-## Literals
-
+### Literals
 ```
 # Integer
-90
+10
 
-# Floating-point Number
-90.7
+# Floating-point number
+99.9
 
-# String
-"Your other programming language"
+# string
+"abc"
 
 # Boolean
 true
 false
 ```
 
-## Comments
-
+### Comments
 ```
 # Oneline Comment
 
@@ -36,10 +67,9 @@ false
 ~
 ```
 
-## Variable Declaration & Assignment
-
+### Variable Declaration & Assignment
 ```
-var name = "Alexander The Great"
+var name: string = "Alexander The Great"
 
 show(name)
 
@@ -47,53 +77,43 @@ set name = "Marcus Aurelius"
 
 show(name)
 
-var ints = 10
-set ints += 80
+var ints: number = 10
+set ints: number += 80
 
 show(ints)
 ```
 
-## Function
-
+### Function
 ```
-prc power(x) {
+prc power(x: number): number {
     return x ^ 2
 }
 
-var result = power(9)
+var result: number = power(9)
 
 show(result)
 ```
 
-## Closures
-
+### Anonymous Function
 ```
-prc outer() {
-    var counter = 0
+var newFunc: func(number) -> string = prc (lc: number): string {
+  if (lc > 10) {
+    return "bigger than ten"
+  }
 
-    prc inner() {
-        set counter = counter + 1
-
-        return counter
-    }
-
-    return inner
+  return "lower or same than ten"
 }
 
-var dec_outer = outer()
-
-show(dec_outer())
-show(dec_outer())
+newFunc(9.9)
 ```
 
-## Collections
-
+### Collections
 ```
 # list declaration
-var n_number = [1, 2, 3, 4, 5]
+var n_number: list[number] = [1, 2, 3, 4, 5]
 
 # mutation by index
-set n_number[0] = [99, 98]
+set n_number[0] = 99
 
 # indexing
 show(n_number[0])
@@ -104,7 +124,8 @@ show(n_number[0:2])
 show(n_number)
 
 # hashmap declaration
-var book = { "id" : 1, "name" : "Andrew" }
+# hashmap key always string, so the only type parameter is for the value
+var book: hashmap[any] = { "id" : 1, "name" : "Andrew" }
 
 # mutation by key
 set book["id"] = 888
@@ -118,8 +139,8 @@ show(book)
 ## if-maybe-whatever 
 
 ```
-var ten = 10
-var nine = 9
+var ten: number = 10
+var nine: number = 9
 
 if (ten >= nine) {
     show("it's bigger")
@@ -132,10 +153,9 @@ if (ten >= nine) {
 }
 ```
 
-## loop
-
+### loop
 ```
-var index = 0
+var index: number = 0
 
 loop (index < 10) {
     show(index)
@@ -145,9 +165,9 @@ loop (index < 10) {
 
 # list iteration
 
-var i = 0
-var lst = ["Apple", "Bitcoin", "China"]
-var len_lst = length(lst)
+var i: number = 0
+var lst: list[string] = ["Apple", "Bitcoin", "China"]
+var len_lst: number = length(lst)
 
 loop (i < len_lst) {
     show(lst[i])
@@ -157,12 +177,13 @@ loop (i < len_lst) {
 
 # continue & break
 
-var c_index = 0
+var c_index: number = 0
 
 loop (c_index < 10) {
     show(c_index)
 
     if (c_index % 2 != 2) {
+      c_index += 1
       continue
     } maybe (c_index == 8) {
       break
@@ -171,35 +192,3 @@ loop (c_index < 10) {
     set c_index += 1
 }
 ```
-
-## TODO
-- [x] syntax
-- [x] lexer
-- [x] parser
-- [x] environment
-- [x] interpreter
-- [x] function declaration
-- [x] function call
-- [x] built-in functions
-- [x] closure
-- [x] list
-- [x] hashmap
-- [x] loop
-- [x] if-else
-- [x] return statement
-- [x] break statement
-- [x] continue statement
-- [x] boolean
-- [x] list operations 
-    - [x] indexing
-    - [x] slicing
-    - [x] push
-    - [x] mutation with index
-- [x] hashmap operations
-    - [x] get value by key
-    - [x] mutation by key
-- [ ] better error message
-- [x] comment
-    - [x] oneline comment
-    - [x] multiline comment
-- [x] anonymous function
